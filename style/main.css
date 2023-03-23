@@ -1,0 +1,40 @@
+html,
+body {
+  background-color: black;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.pageContainer {
+  min-width: 320px;
+}
+
+.gameContainer {
+  /* background-color: blue; */
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  place-items: center;
+}
+
+.tileGrid {
+  /* background-color: pink; */
+  display: grid;
+  width: 66vh; /*adjust this to change size of tile grid*/
+  grid-template-rows: repeat(6, auto);
+  grid-template-columns: repeat(5, auto);
+}
+
+.tile {
+  aspect-ratio: 1 / 1;
+  border: 1px solid white;
+  box-sizing: border-box;
+  /* max-width: 13vh; */
+  margin: 4px;
+  color: white;
+  text-transform: uppercase;
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+}
