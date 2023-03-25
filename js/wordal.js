@@ -1,5 +1,5 @@
 class Wordal {
-  constructor(secretWord) {
+  constructor(secretWord = "guess") {
     this.secretWord = secretWord.toUpperCase()
     this.guesses = []
     this.letterStatus = {}
@@ -82,4 +82,4 @@ class Wordal {
   }
 }
 
-export { Wordal }
+// export { Wordal }
