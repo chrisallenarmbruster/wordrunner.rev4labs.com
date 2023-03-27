@@ -5,4 +5,13 @@ const DICT =
 
 const WORDS = DICT.split(",")
 
-export { WORDS }
+// export { WORDS }
+
+import fs from "fs"
+
+let test = ""
+for (let word of WORDS) test += `"${word}",`
+
+fs.writeFile("Output.txt", test, (err) => {
+  if (err) throw err
+})

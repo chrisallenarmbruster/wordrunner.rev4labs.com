@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/chrisallenarmbruster/wordal-web/issues"
   },
-  "homepage": "https://github.com/chrisallenarmbruster/wordal-web#readme"
+  "homepage": "https://github.com/chrisallenarmbruster/wordal-web#readme",
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
 }

@@ -1,11 +1,23 @@
 :root {
   --default: #121213;
   --text: #ffffff;
-  --tileMissed: #3a3a3c;
+  --key: #818384;
+  --tileMiss: #3a3a3c;
   --tileClose: #b59f3b;
   --tileHit: #538d4e;
-  --key: #818384;
-  
+  --termGreen: #0ae735;
+  --termAmber: #ff9a02;
+  --brBlue1: #17aad8;
+  --brBlue2: #017cb0;
+  --brBlue3: #0b61a8;
+  --brOrange1: #fe9200;
+  --brOrange2: #ee610a;
+  --brOrange3: #ea410b;
+}
+
+@font-face {
+  font-family: "Blade Runner";
+  src: url(./BLADRMF_.TTF);
 }
 
 html,
@@ -16,7 +28,6 @@ body {
   padding: 0;
   text-align: center;
 }
-
 
 div {
   margin: 0;
@@ -31,12 +42,38 @@ div {
 }
 
 .header {
-  color: var(--text);
-  font-size: 3rem;
+  color: var(--brOrange2);
+  font-family: "Blade Runner";
+  font-size: 1.8rem;
+  padding: 1rem 0;
   margin: 0.5rem;
-  border-bottom: 0.1rem solid var(--text); */
-
+  border-bottom: 0.1rem solid var(--tileMiss);
+  /* background-color: var(--brOrange1); */
 }
+
+.message {
+  color: var(--brOrange2);
+  font-family: "Readex Pro", sans-serif;
+  font-size: 1.5rem;
+  padding: 1rem 0;
+  margin: 0.5rem;
+  height: 2rem;
+  /* border: 0.1rem solid var(--brOrange1); */
+  border-bottom: 0.1rem solid var(--brOrange2);
+  border-top: 0.1rem solid var(--brOrange2);
+  background-color: var(--default);
+}
+
+/* .message {
+  color: var(--brBlue1);
+  font-family: "Oxanium", cursive;
+  font-size: 1.5rem;
+  padding: 0.7rem 0;
+  margin: 0.5rem;
+  height: 2rem;
+  border: 0.1rem solid var(--brBlue1);
+  background-color: var(--default);
+} */
 
 .gameContainer {
   display: flex;
@@ -47,7 +84,7 @@ div {
 
 .tileGrid {
   display: grid;
-  width: 100%; 
+  width: 100%;
   /* grid-template-rows: repeat(6, auto);
   grid-template-columns: repeat(5, auto); */
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -56,15 +93,16 @@ div {
 
 .tile {
   aspect-ratio: 1 / 1;
-  border: 2px solid var(--tileMissed);
+  border: 2px solid var(--tileMiss);
   box-sizing: border-box;
   margin: 4px;
   color: var(--text);
   text-transform: uppercase;
   display: grid;
   place-items: center;
+  font-family: "Oxanium", cursive;
   font-size: 2.25rem;
-  font-weight: bold;
+  /* font-weight: bold; */
   /* width:50px;  */
 }
 
@@ -77,8 +115,8 @@ div {
 .keyboardGrid {
   display: grid;
   width: 60vh;
-    /* grid-template-rows: 3rem 3rem 3rem; */
-  grid-template-rows:  1fr 1fr 1fr;
+  /* grid-template-rows: 3rem 3rem 3rem; */
+  grid-template-rows: 1fr 1fr 1fr;
   grid-template-columns: 1fr;
 }
 
@@ -89,7 +127,7 @@ div {
 
 .keyboardRow1 {
   display: grid;
-  width:100%;
+  width: 100%;
   grid-template-rows: 1fr;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
@@ -97,7 +135,7 @@ div {
   display: grid;
   width: 100%;
   grid-template-rows: 1fr;
-  grid-template-columns: .5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr .5fr;
+  grid-template-columns: 0.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 0.5fr;
 }
 .keyboardRow3 {
   display: grid;
@@ -109,17 +147,18 @@ div {
 .key,
 .keySpacer {
   display: grid;
-  border: 1px solid var(--default);
+  border: 1px solid var(--text);
   box-sizing: border-box;
   text-align: center;
+  font-family: "Oxanium", cursive;
   font-size: 1rem;
-  font-weight: bold;
+  font-weight: bolder;
   place-items: center;
   margin: 0.1em;
-  border-radius: .5em;
+  border-radius: 0.5em;
   color: var(--text);
   aspect-ratio: 1 / 1;
-  background-color: var(--key);
+  background-color: var(--default);
 }
 
 .keySpacer {
@@ -127,8 +166,23 @@ div {
   aspect-ratio: 1 / 2;
 }
 
-#backspace,
-#enter {
+#Backspace,
+#Enter {
   aspect-ratio: 3 / 2;
-  font-size: .6rem;
+  font-size: 0.6rem;
+}
+
+.tileHit {
+  color: var(--brBlue1);
+  border: 2px solid var(--brBlue1);
+}
+
+.tileClose {
+  color: var(--brOrange2);
+  border: 2px solid var(--brOrange2);
+}
+
+.tileMiss {
+  color: var(--tileMiss);
+  border: 2px solid var(--tileMiss);
 }
