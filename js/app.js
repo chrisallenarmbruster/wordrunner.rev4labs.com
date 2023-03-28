@@ -176,7 +176,7 @@ window.addEventListener("keydown", function (event) {
     event.preventDefault()
     document.getElementById("Enter").click()
   } else if (
-    "ABCDEFGHIJKLMNOPQRSTUVWZYZ".split("").includes(event.key.toUpperCase())
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(event.key.toUpperCase())
   ) {
     event.preventDefault()
     document.getElementById(event.key.toUpperCase()).click()

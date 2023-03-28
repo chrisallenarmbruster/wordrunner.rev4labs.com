@@ -172,16 +172,15 @@ div {
   font-size: 0.6rem;
 }
 
-.tileHit {
-  color: var(--brBlue1);
-  border: 2px solid var(--brBlue1);
-}
-
 .tileClose {
   color: var(--brOrange2);
   border: 2px solid var(--brOrange2);
 }
 
+.tileHit {
+  color: var(--brBlue1);
+  border: 2px solid var(--brBlue1);
+}
 .tileMiss {
   color: var(--tileMiss);
   border: 2px solid var(--tileMiss);
