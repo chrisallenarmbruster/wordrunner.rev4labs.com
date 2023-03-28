@@ -3,6 +3,8 @@
 
 let game, uiState
 
+const jsConfetti = new JSConfetti()
+
 function drawKey(key) {
   const keyButton = document.createElement("button")
   keyButton.id = key === "⌫" ? "Backspace" : key === "ENTER" ? "Enter" : key
@@ -80,28 +82,45 @@ function deleteLetter() {
   }
 }
 
-const checkRow = () => {
+async function checkRow() {
   const guess = uiState.board[uiState.curRow].join("")
   if (game.gameState === "PLAYING" && uiState.curCol > 4) {
     if (!commonWords.includes(guess.toLowerCase())) {
       displayMessage(`\"${guess.toLowerCase()}\" is not a word`)
       console.log(guess, "not a word")
     } else {
-      console.log(guess, "is a valid a word")
-      console.log(game.submitGuess(guess))
+      // console.log(guess, "is a valid a word")
+      game.submitGuess(guess)
       //valid submisssion
-      revealGuess()
+      await revealGuess()
+      console.log("returned from revealGuess()")
       updateKeyboard()
       if (game.secretWord === guess) {
         //guess is right
+        jsConfetti.addConfetti({
+          confettiColors: [
+            "#17aad8",
+            "#017cb0",
+            "#0b61a8",
+            "#fe9200",
+            "#ee610a",
+            "#ea410b",
+          ],
+        })
         displayMessage("You Win!")
+        Enter.classList.add("gameOver")
+        Enter.textContent = "RESET"
         console.log("you win")
+        uiState.curRow++
       } else {
         if (uiState.curRow >= 5) {
           displayMessage(
             `You Lose! Word was \"${game.secretWord.toLowerCase()}\"`,
             10000
           )
+          uiState.curRow++
+          Enter.classList.add("gameOver")
+          Enter.textContent = "RESET"
           console.log("you lost")
         } else {
           console.log("But it's not the secret word, try again")
@@ -113,14 +132,41 @@ const checkRow = () => {
   }
 }
 
-function revealGuess() {
-  let gArr = game.guessStatus()
-  console.log(gArr, uiState.curRow)
-  if (gArr[uiState.curRow]) {
-    let word = gArr[uiState.curRow]
-    console.log(word)
+async function revealGuess() {
+  return new Promise(async function (resolve, reject) {
+    let gArr = game.guessStatus()
+    console.log(
+      "revealGuess() started, guessStatus():",
+      gArr,
+      "curRow:",
+      uiState.curRow
+    )
+    if (gArr[uiState.curRow]) {
+      let word = gArr[uiState.curRow]
+      // console.log(word)
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      let interval = setInterval(() => {
+        for (let col = 0; col < 5; col++) {
+          let tile = document.getElementById(`tile-${uiState.curRow}-${col}`)
+          tile.textContent = letters[Math.floor(Math.random() * 26)]
+        }
+      }, 30)
+      // setTimeout(() => colorTiles(word, interval), 10)
+      await colorTiles(word, interval)
+      resolve()
+    }
+  })
+}
+
+function colorTiles(word, interval) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(resolve, 1000)
+  }).then(function () {
+    clearInterval(interval)
+    // updateKeyboard()
     for (let [idx, letter] of word.entries()) {
       let tile = document.getElementById(`tile-${uiState.curRow}-${idx}`)
+      tile.textContent = word[idx]["letter"]
       tile.classList.add(
         letter.status === "G"
           ? "tileHit"
@@ -129,14 +175,14 @@ function revealGuess() {
           : "tileMiss"
       )
     }
-  }
+  })
 }
 
 function updateKeyboard() {
-  console.log("stat: ", game.letterStatus)
+  // console.log("stat: ", game.letterStatus)
   for (let [letter, status] of Object.entries(game.letterStatus)) {
     // console.log(letter, status)
-    console.log("letter:", letter, "status:", status)
+    // console.log("letter:", letter, "status:", status)
     let key = document.getElementById(letter)
     key.classList.add(
       status === "G"
@@ -210,11 +256,33 @@ function resetGame() {
       ["", "", "", "", ""],
     ],
   }
+  Enter.classList.remove("gameOver")
+  Enter.textContent = "ENTER"
+
+  setTimeout(() => {
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < 5; col++) {
+        tile = document.getElementById(`tile-${row}-${col}`)
+        tile.textContent = ""
+        tile.innerHTML = '<span class="tileWaterMark">B</span>'
+        tile.className = "tile reset"
+      }
+    }
+  }, 500)
+
+  setTimeout(() => {
+    for (let row = 0; row < 6; row++) {
+      for (let col = 0; col < 5; col++) {
+        tile = document.getElementById(`tile-${row}-${col}`)
+        tile.classList.remove("reset")
+      }
+    }
+  }, 1000)
+
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 5; col++) {
       tile = document.getElementById(`tile-${row}-${col}`)
-      tile.textContent = ""
-      tile.className = "tile"
+      tile.classList.add("reset")
     }
   }
   for (let letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")) {

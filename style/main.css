@@ -2,7 +2,8 @@
   --default: #121213;
   --text: #ffffff;
   --key: #818384;
-  --tileMiss: #3a3a3c;
+  --watermark: #2a2a2c;
+  --tileMiss: #4a4a4c;
   --tileClose: #b59f3b;
   --tileHit: #538d4e;
   --termGreen: #0ae735;
@@ -106,6 +107,11 @@ div {
   /* width:50px;  */
 }
 
+.tileWaterMark {
+  font-family: "Blade Runner";
+  color: var(--watermark);
+}
+
 .keyboardContainer {
   display: flex;
   justify-content: center;
@@ -184,4 +190,26 @@ div {
 .tileMiss {
   color: var(--tileMiss);
   border: 2px solid var(--tileMiss);
+}
+
+.gameOver {
+  background-color: var(--brOrange3);
+  color: var(--default);
+  border: 1px solid var(--brOrange3);:
+}
+
+.reset {
+  animation: 1s linear resetting;
+}
+
+@keyframes resetting {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
 }
