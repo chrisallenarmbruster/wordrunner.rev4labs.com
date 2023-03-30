@@ -27,7 +27,27 @@
       <div class="keyboardContainer" id="keyboardContainer">
         <div class="keyboardGrid" id="keyboardGrid"></div>
       </div>
+      <div id="modalContainer" class="modalContainer">
+        <div id="modalContent" class="modalContent">
+          <span class="close">&times;</span>
+          <h4 id="modalTitle" class="modalTitle">Mission Briefing</h4>
+          <p class="modalContentItem">
+            It is 2049 and you are replicant KD6-3.7 hired as a word runner to
+            hunt rogue replicants. You must crack codes to do this.
+          </p>
+          <p class="modalContentItem">Each code is a 5 letter word.</p>
+          <p class="modalContentItem">
+            Blue indicates right letter in right position.
+          </p>
+          <p class="modalContentItem">
+            Orange indicates right letter in wrong position.
+          </p>
+          <p class="modalContentItem">You have 6 attempts before lockout.</p>
+          <p class="modalContentItem">Good luck!</p>
+        </div>
+      </div>
     </div>
+
     <script src="./js/commonWords.js"></script>
     <script src="./js/rareWords.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>

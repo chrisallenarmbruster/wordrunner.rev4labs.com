@@ -2,8 +2,125 @@
 // import { WORDS } from "./words.js"
 
 let game, uiState
-
 const jsConfetti = new JSConfetti()
+
+let campaign = {
+  gamesPlayed: 0,
+  gamesWon: 0,
+  winPercentage: 0,
+  averageAttempts: 0,
+  sluggingPercentage: 0,
+  highScore: 0,
+  curStreak: 0,
+  bestStreak: 0,
+  gameDetails: [],
+}
+
+function calculateScore() {
+  let letterValues = {
+    a: 1,
+    b: 3,
+    c: 3,
+    d: 2,
+    e: 1,
+    f: 4,
+    g: 2,
+    h: 4,
+    i: 1,
+    j: 8,
+    k: 5,
+    l: 1,
+    m: 3,
+    n: 1,
+    o: 1,
+    p: 3,
+    q: 10,
+    r: 1,
+    s: 1,
+    t: 1,
+    u: 1,
+    v: 4,
+    w: 4,
+    x: 8,
+    y: 4,
+    z: 10,
+  }
+
+  let wordScore = game.secretWord
+    .toLowerCase()
+    .split("")
+    .reduce((acc, cv) => {
+      return acc + letterValues[cv]
+    }, 0)
+  console.log(wordScore)
+
+  switch (uiState.curRow) {
+    case 6:
+      return wordScore * 1
+    case 5:
+      return wordScore * 10
+    case 4:
+      return wordScore * 100
+    case 3:
+      return wordScore * 1000
+    case 2:
+      return wordScore * 10000
+    case 1:
+      return wordScore * 100000
+    default:
+      return 0
+  }
+}
+
+function updateCampaign(gameDetails) {
+  campaign.gamesPlayed++
+  if (gameDetails.outcome === "won") {
+    campaign.gamesWon++
+    campaign.curStreak++
+  } else {
+    campaign.curStreak = 0
+  }
+  if (campaign.curStreak > campaign.bestStreak) {
+    campaign.bestStreak = campaign.curStreak
+  }
+  campaign.gameDetails.push(gameDetails)
+  campaign.averageAttempts =
+    campaign.gameDetails
+      .filter((el) => el.outcome === "won")
+      .reduce((acc, cv) => {
+        return acc + cv.attempts
+      }, 0) /
+    (campaign.gameDetails.filter((el) => el.outcome === "won").length > 0
+      ? campaign.gameDetails.filter((el) => el.outcome === "won").length
+      : 1
+    ).toFixed(1)
+
+  campaign.winPercentage = Math.round(
+    (100 * campaign.gamesWon) / campaign.gamesPlayed
+  )
+
+  campaign.sluggingPercentage = Math.round(
+    (100 *
+      campaign.gameDetails
+        .filter((el) => el.outcome === "won")
+        .reduce((acc, cv) => {
+          if (cv.attempts === 1) return acc + 6
+          if (cv.attempts === 2) return acc + 5
+          if (cv.attempts === 3) return acc + 4
+          if (cv.attempts === 4) return acc + 3
+          if (cv.attempts === 5) return acc + 2
+          if (cv.attempts === 6) return acc + 1
+        }, 0)) /
+      campaign.gamesPlayed
+  )
+
+  if (gameDetails.score > campaign.highScore) {
+    campaign.highScore = gameDetails.score
+  }
+
+  localStorage.setItem("campaign", JSON.stringify(campaign))
+  console.log(JSON.parse(localStorage.getItem("campaign")))
+}
 
 function drawKey(key) {
   const keyButton = document.createElement("button")
@@ -86,17 +203,13 @@ async function checkRow() {
   const guess = uiState.board[uiState.curRow].join("")
   if (game.gameState === "PLAYING" && uiState.curCol > 4) {
     if (!commonWords.includes(guess.toLowerCase())) {
-      displayMessage(`\"${guess.toLowerCase()}\" is not a word`)
-      console.log(guess, "not a word")
+      displayMessage(`${guess} is not a word`)
     } else {
-      // console.log(guess, "is a valid a word")
       game.submitGuess(guess)
-      //valid submisssion
       await revealGuess()
       console.log("returned from revealGuess()")
       updateKeyboard()
       if (game.secretWord === guess) {
-        //guess is right
         jsConfetti.addConfetti({
           confettiColors: [
             "#17aad8",
@@ -107,21 +220,46 @@ async function checkRow() {
             "#ea410b",
           ],
         })
-        displayMessage("You Win!")
-        Enter.classList.add("gameOver")
-        Enter.textContent = "RESET"
-        console.log("you win")
-        uiState.curRow++
-      } else {
-        if (uiState.curRow >= 5) {
-          displayMessage(
-            `You Lose! Word was \"${game.secretWord.toLowerCase()}\"`,
-            10000
-          )
-          uiState.curRow++
+        setTimeout(() => {
           Enter.classList.add("gameOver")
           Enter.textContent = "RESET"
+        }, 3000)
+        uiState.curRow++
+        updateCampaign({
+          outcome: "won",
+          attempts: uiState.curRow,
+          word: game.secretWord,
+          score: calculateScore(),
+        })
+        setTimeout(() => {
+          showModal("Success", [
+            `Code ${game.secretWord} successfully decrypted in ${
+              uiState.curRow
+            } attempt${uiState.curRow > 1 ? "s." : "."}`,
+            "Please proceed to next assignment.",
+          ])
+        }, 1500)
+      } else {
+        if (uiState.curRow >= 5) {
+          uiState.curRow++
+          updateCampaign({
+            outcome: "lost",
+            attempts: uiState.curRow,
+            word: game.secretWord,
+            score: calculateScore(),
+          })
+          setTimeout(() => {
+            Enter.classList.add("gameOver")
+            Enter.textContent = "RESET"
+          }, 1500)
           console.log("you lost")
+          showModal("Failure", [
+            "After 6 incorrect attempts you've been locked out.",
+            "Please proceed to another assignment.",
+            "============",
+            `Mission Notes:`,
+            `Code ${game.secretWord} successfully decrypted by competing intelligence.`,
+          ])
         } else {
           console.log("But it's not the secret word, try again")
           uiState.curRow++
@@ -220,6 +358,7 @@ function drawTileGrid(container, rows = 6, cols = 5) {
 window.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
     event.preventDefault()
+    modalContainer.style.display = "none"
     document.getElementById("Enter").click()
   } else if (
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(event.key.toUpperCase())
@@ -239,6 +378,36 @@ function displayMessage(message, time = 3500) {
     header.className = "header"
     header.textContent = "wordBrunner"
   }, time)
+}
+
+function showModal(title = "Title", content = ["lorem ipsum"]) {
+  let modalContent = document.createElement("div")
+  modalContent.id = "modalContent"
+  modalContent.className = "modalContent"
+
+  let closeButton = document.createElement("span")
+  closeButton.className = "close"
+  closeButton.textContent = `x`
+  closeButton.addEventListener("click", () => {
+    modalContainer.style.display = "none"
+  })
+  modalContent.appendChild(closeButton)
+
+  let modalTitle = document.createElement("h4")
+  modalTitle.className = "modalTitle"
+  modalTitle.textContent = title
+  modalContent.appendChild(modalTitle)
+
+  for (let item of content) {
+    let modalContentItem = document.createElement("p")
+    modalContentItem.className = "modalContentItem"
+    modalContentItem.textContent = item
+    modalContent.appendChild(modalContentItem)
+  }
+
+  modalContainer.replaceChildren()
+  modalContainer.appendChild(modalContent)
+  modalContainer.style.display = "block"
 }
 
 function resetGame() {
@@ -294,9 +463,21 @@ function resetGame() {
 }
 
 function main() {
+  // localStorage.clear()
+  if (localStorage.getItem("campaign")) {
+    campaign = JSON.parse(localStorage.getItem("campaign"))
+  }
   drawTileGrid(gameContainer)
   drawKeyboard(keyboardGrid)
   resetGame()
+  showModal("Mission Briefing", [
+    "It is 2049 and you are replicant KD6-3.7 hired as a word runner to hunt rogue replicants. You must crack codes to do this.",
+    "Each code is a 5 letter word.",
+    "Blue indicates right letter in right position.",
+    "Orange indicates right letter in wrong position.",
+    "You have 6 attempts before lockout.",
+    "Good Luck!",
+  ])
 }
 
 window.onload = function () {

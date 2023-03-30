@@ -25,9 +25,11 @@ html,
 body {
   background-color: var(--default);
   font-family: "Readex Pro", sans-serif;
+  font-family: "Oxanium", cursive;
   margin: 0;
   padding: 0;
   text-align: center;
+ 
 }
 
 div {
@@ -36,10 +38,14 @@ div {
 }
 
 .pageContainer {
+  display: grid;
   text-align: center;
   margin: 5px auto;
   min-width: 320px;
   max-width: 55vh; /*adjust this to control size of games on large screens*/
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  height: calc(95vh-10px);
 }
 
 .header {
@@ -55,6 +61,7 @@ div {
 .message {
   color: var(--brOrange2);
   font-family: "Readex Pro", sans-serif;
+  font-family: "Oxanium", cursive;
   font-size: 1.5rem;
   padding: 1rem 0;
   margin: 0.5rem;
@@ -65,27 +72,18 @@ div {
   background-color: var(--default);
 }
 
-/* .message {
-  color: var(--brBlue1);
-  font-family: "Oxanium", cursive;
-  font-size: 1.5rem;
-  padding: 0.7rem 0;
-  margin: 0.5rem;
-  height: 2rem;
-  border: 0.1rem solid var(--brBlue1);
-  background-color: var(--default);
-} */
 
 .gameContainer {
   display: flex;
   justify-content: center;
-  width: 90%;
+  /*changed from 90 on 3/29*/
+  width: 100%;
   margin: auto;
 }
 
 .tileGrid {
   display: grid;
-  width: 100%;
+  width: 80%;
   /* grid-template-rows: repeat(6, auto);
   grid-template-columns: repeat(5, auto); */
   grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
@@ -102,7 +100,7 @@ div {
   display: grid;
   place-items: center;
   font-family: "Oxanium", cursive;
-  font-size: 2.25rem;
+  font-size: 1.75rem;/*changed from 2.25 3/29*/
   /* font-weight: bold; */
   /* width:50px;  */
 }
@@ -200,9 +198,9 @@ div {
 }
 
 .gameOver {
-  background-color: var(--brOrange3);
+  background-color: var(--brBlue1);
   color: var(--default);
-  border: 1px solid var(--brOrange3);:
+  border: 1px solid var(--brBlue1);:
 }
 
 .reset {
@@ -219,4 +217,61 @@ div {
   100% {
     transform: rotateX(0deg);
   }
+}
+
+.modalContainer {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modalContent {
+  font-family: "Oxanium", cursive;
+  background-color: rgba(99.6,57.3,0,.6);
+  color:var(--brOrange1);
+  margin: auto;
+  padding: 10px;
+  padding-top:0px;
+  /* border: 2px solid var(--brOrange1); */
+  width: 80%;
+  max-width: 40vh;
+  font-size: 1.5rem;
+}
+
+.modalTitle {
+  font-family: "Oxanium", cursive;
+  margin: 10px 0px 0px 0px;
+  padding: 10px 0px 5px 0px;
+}
+
+.modalContentItem {
+  font-family: "Oxanium", cursive;
+  margin:0 0;
+  padding:4px 10px;
+  font-size: 1.15rem;
+  text-align: left;
+}
+
+/* The Close Button */
+.close {
+  color:var(--brOrange1);
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color:var(--brOrange3);
+  text-decoration: none;
+  cursor: pointer;
 }
