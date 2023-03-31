@@ -275,3 +275,16 @@ div {
   text-decoration: none;
   cursor: pointer;
 }
+
+.statTable {
+  margin: auto;
+  border-top: 1px solid var(--brOrange1);
+    border-bottom: 1px solid var(--brOrange1);
+}
+.statTable td{
+  padding: 0 .75rem;
+}
+
+.statNum {
+  text-align: right;
+}

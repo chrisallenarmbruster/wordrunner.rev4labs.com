@@ -11,6 +11,7 @@ let campaign = {
   averageAttempts: 0,
   sluggingPercentage: 0,
   highScore: 0,
+  averageScore: 0,
   curStreak: 0,
   bestStreak: 0,
   gameDetails: [],
@@ -54,22 +55,29 @@ function calculateScore() {
     }, 0)
   console.log(wordScore)
 
-  switch (uiState.curRow) {
-    case 6:
-      return wordScore * 1
-    case 5:
-      return wordScore * 10
-    case 4:
-      return wordScore * 100
-    case 3:
-      return wordScore * 1000
-    case 2:
-      return wordScore * 10000
-    case 1:
-      return wordScore * 100000
-    default:
-      return 0
+  return wordScore * 10 ** (6 - uiState.curRow)
+}
+
+function statTable(gameDetails) {
+  let statStr = "<table class='statTable'>"
+  function statRow(statKey, statValue) {
+    return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`
   }
+  if (gameDetails) {
+    statStr += statRow("Word", gameDetails.word)
+    statStr += statRow("Attempts", gameDetails.attempts)
+    statStr += statRow("Round Score", gameDetails.score)
+  }
+  statStr += statRow("Average Score", campaign.averageScore)
+  statStr += statRow("High Score", campaign.highScore)
+  statStr += statRow("Winning %", campaign.winPercentage)
+  statStr += statRow("Slugging %", campaign.sluggingPercentage)
+  statStr += statRow("Best Streak", campaign.bestStreak)
+  statStr += statRow("Current Streak", campaign.curStreak)
+  statStr += statRow("Attempts/Rnd", campaign.averageAttempts)
+  statStr += statRow("Rounds Played", campaign.gamesPlayed)
+
+  return statStr + "</table>"
 }
 
 function updateCampaign(gameDetails) {
@@ -84,16 +92,16 @@ function updateCampaign(gameDetails) {
     campaign.bestStreak = campaign.curStreak
   }
   campaign.gameDetails.push(gameDetails)
-  campaign.averageAttempts =
-    campaign.gameDetails
-      .filter((el) => el.outcome === "won")
-      .reduce((acc, cv) => {
-        return acc + cv.attempts
-      }, 0) /
-    (campaign.gameDetails.filter((el) => el.outcome === "won").length > 0
-      ? campaign.gameDetails.filter((el) => el.outcome === "won").length
-      : 1
+
+  campaign.averageAttempts = parseFloat(
+    (
+      campaign.gameDetails
+        .filter((el) => el.outcome === "won")
+        .reduce((acc, cv) => {
+          return acc + cv.attempts
+        }, 0) / campaign.gamesWon
     ).toFixed(1)
+  )
 
   campaign.winPercentage = Math.round(
     (100 * campaign.gamesWon) / campaign.gamesPlayed
@@ -103,14 +111,12 @@ function updateCampaign(gameDetails) {
     (100 *
       campaign.gameDetails
         .filter((el) => el.outcome === "won")
-        .reduce((acc, cv) => {
-          if (cv.attempts === 1) return acc + 6
-          if (cv.attempts === 2) return acc + 5
-          if (cv.attempts === 3) return acc + 4
-          if (cv.attempts === 4) return acc + 3
-          if (cv.attempts === 5) return acc + 2
-          if (cv.attempts === 6) return acc + 1
-        }, 0)) /
+        .reduce((acc, cv) => acc + 7 - cv.attempts, 0)) /
+      campaign.gamesPlayed
+  )
+
+  campaign.averageScore = Math.round(
+    campaign.gameDetails.reduce((acc, cv) => acc + cv.score, 0) /
       campaign.gamesPlayed
   )
 
@@ -210,6 +216,13 @@ async function checkRow() {
       console.log("returned from revealGuess()")
       updateKeyboard()
       if (game.secretWord === guess) {
+        uiState.curRow++
+        let gameDetails = {
+          outcome: "won",
+          attempts: uiState.curRow,
+          word: game.secretWord,
+          score: calculateScore(),
+        }
         jsConfetti.addConfetti({
           confettiColors: [
             "#17aad8",
@@ -224,42 +237,29 @@ async function checkRow() {
           Enter.classList.add("gameOver")
           Enter.textContent = "RESET"
         }, 3000)
-        uiState.curRow++
-        updateCampaign({
-          outcome: "won",
-          attempts: uiState.curRow,
-          word: game.secretWord,
-          score: calculateScore(),
-        })
+        updateCampaign(gameDetails)
         setTimeout(() => {
-          showModal("Success", [
-            `Code ${game.secretWord} successfully decrypted in ${
-              uiState.curRow
-            } attempt${uiState.curRow > 1 ? "s." : "."}`,
-            "Please proceed to next assignment.",
-          ])
+          showModal("Success", [statTable(gameDetails)])
         }, 1500)
       } else {
         if (uiState.curRow >= 5) {
           uiState.curRow++
-          updateCampaign({
+          let gameDetails = {
             outcome: "lost",
             attempts: uiState.curRow,
             word: game.secretWord,
-            score: calculateScore(),
-          })
+            score:
+              campaign.averageScore > 0
+                ? -campaign.averageScore
+                : campaign.averageScore,
+          }
+          updateCampaign(gameDetails)
           setTimeout(() => {
             Enter.classList.add("gameOver")
             Enter.textContent = "RESET"
           }, 1500)
           console.log("you lost")
-          showModal("Failure", [
-            "After 6 incorrect attempts you've been locked out.",
-            "Please proceed to another assignment.",
-            "============",
-            `Mission Notes:`,
-            `Code ${game.secretWord} successfully decrypted by competing intelligence.`,
-          ])
+          showModal("Failure", [statTable(gameDetails)])
         } else {
           console.log("But it's not the secret word, try again")
           uiState.curRow++
@@ -401,7 +401,7 @@ function showModal(title = "Title", content = ["lorem ipsum"]) {
   for (let item of content) {
     let modalContentItem = document.createElement("p")
     modalContentItem.className = "modalContentItem"
-    modalContentItem.textContent = item
+    modalContentItem.innerHTML = item
     modalContent.appendChild(modalContentItem)
   }
 
@@ -471,7 +471,7 @@ function main() {
   drawKeyboard(keyboardGrid)
   resetGame()
   showModal("Mission Briefing", [
-    "It is 2049 and you are replicant KD6-3.7 hired as a word runner to hunt rogue replicants. You must crack codes to do this.",
+    "Decrypt the code.",
     "Each code is a 5 letter word.",
     "Blue indicates right letter in right position.",
     "Orange indicates right letter in wrong position.",
