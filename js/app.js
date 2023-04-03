@@ -167,18 +167,20 @@ function drawKeyboard(container) {
 
 function handleKeyButtonClick(key) {
   console.log("game state", game.gameState)
-  if (game.gameState === "PLAYING") {
-    if (key === "Backspace") {
-      deleteLetter()
-    } else if (key === "Enter") {
-      checkRow()
-      console.log(`checking row: ${key}`)
+  if (!uiState.busy) {
+    if (game.gameState === "PLAYING") {
+      if (key === "Backspace") {
+        deleteLetter()
+      } else if (key === "Enter") {
+        checkRow()
+        console.log(`checking row: ${key}`)
+      } else {
+        appendLetter(key)
+      }
     } else {
-      appendLetter(key)
-    }
-  } else {
-    if (key === "Enter") {
-      resetGame()
+      if (key === "Enter") {
+        resetGame()
+      }
     }
   }
 }
@@ -200,7 +202,8 @@ function deleteLetter() {
     const tile = document.getElementById(
       `tile-${uiState.curRow}-${uiState.curCol}`
     )
-    tile.textContent = ""
+    // tile.textContent = ""
+    tile.innerHTML = '<span class="tileWaterMark">B</span>'
     uiState.board[uiState.curRow][uiState.curCol] = ""
   }
 }
@@ -209,6 +212,7 @@ async function checkRow() {
   const guess = uiState.board[uiState.curRow].join("")
   if (game.gameState === "PLAYING" && uiState.curCol > 4) {
     if (!commonWords.includes(guess.toLowerCase())) {
+      invalidAudio.play()
       displayMessage(`${guess} is not a word`)
     } else {
       game.submitGuess(guess)
@@ -223,6 +227,8 @@ async function checkRow() {
           word: game.secretWord,
           score: calculateScore(),
         }
+        uiState.busy = true
+        successAudio.play()
         jsConfetti.addConfetti({
           confettiColors: [
             "#17aad8",
@@ -233,13 +239,14 @@ async function checkRow() {
             "#ea410b",
           ],
         })
-        setTimeout(() => {
-          Enter.classList.add("gameOver")
-          Enter.textContent = "RESET"
-        }, 3000)
+        // setTimeout(() => {
+        //   Enter.classList.add("gameOver")
+        //   Enter.textContent = "RESET"
+        // }, 3000)
         updateCampaign(gameDetails)
         setTimeout(() => {
           showModal("Success", [statTable(gameDetails)])
+          uiState.busy = false
         }, 1500)
       } else {
         if (uiState.curRow >= 5) {
@@ -259,6 +266,7 @@ async function checkRow() {
             Enter.textContent = "RESET"
           }, 1500)
           console.log("you lost")
+          failAudio.play()
           showModal("Failure", [statTable(gameDetails)])
         } else {
           console.log("But it's not the secret word, try again")
@@ -279,6 +287,7 @@ async function revealGuess() {
       "curRow:",
       uiState.curRow
     )
+    compAudio.play()
     if (gArr[uiState.curRow]) {
       let word = gArr[uiState.curRow]
       // console.log(word)
@@ -356,18 +365,23 @@ function drawTileGrid(container, rows = 6, cols = 5) {
 }
 
 window.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
-    event.preventDefault()
-    modalContainer.style.display = "none"
-    document.getElementById("Enter").click()
-  } else if (
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(event.key.toUpperCase())
-  ) {
-    event.preventDefault()
-    document.getElementById(event.key.toUpperCase()).click()
-  } else if (event.key === "Backspace" || event.key === "Delete") {
-    event.preventDefault()
-    document.getElementById("Backspace").click()
+  if (!uiState.busy) {
+    if (event.key === "Enter") {
+      event.preventDefault()
+      if (modalContainer.style.display != "none") {
+        closeButton.click()
+      } else {
+        document.getElementById("Enter").click()
+      }
+    } else if (
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(event.key.toUpperCase())
+    ) {
+      event.preventDefault()
+      document.getElementById(event.key.toUpperCase()).click()
+    } else if (event.key === "Backspace" || event.key === "Delete") {
+      event.preventDefault()
+      document.getElementById("Backspace").click()
+    }
   }
 })
 
@@ -380,16 +394,45 @@ function displayMessage(message, time = 3500) {
   }, time)
 }
 
+function addAudio(id, url, container) {
+  let audio = document.createElement("audio")
+  audio.id = id
+  audio.src = url
+  audio.type = "audio/mpeg"
+  audio.preload = "auto"
+  container.append(audio)
+}
+
+function setUpAudio() {
+  addAudio("compAudio", "./audio/comp.mp3", pageContainer)
+  addAudio("successAudio", "./audio/fight.mp3", pageContainer)
+  addAudio("failAudio", "./audio/regret.mp3", pageContainer)
+  addAudio("invalidAudio", "./audio/invalid.mp3", pageContainer)
+  addAudio("ratchetAudio", "./audio/ratchet.mp3", pageContainer)
+  addAudio("themeAudio", "./audio/openingTitle.mp3", pageContainer)
+}
+
 function showModal(title = "Title", content = ["lorem ipsum"]) {
   let modalContent = document.createElement("div")
   modalContent.id = "modalContent"
   modalContent.className = "modalContent"
 
   let closeButton = document.createElement("span")
+  closeButton.id = "closeButton"
   closeButton.className = "close"
   closeButton.textContent = `x`
   closeButton.addEventListener("click", () => {
     modalContainer.style.display = "none"
+    successAudio.pause()
+    successAudio.currentTime = 0
+    failAudio.pause()
+    failAudio.currentTime = 0
+    themeAudio.pause()
+    themeAudio.currentTime = 0
+    if (game.gameState !== "PLAYING") {
+      Enter.classList.add("gameOver")
+      Enter.textContent = "RESET"
+    }
   })
   modalContent.appendChild(closeButton)
 
@@ -424,9 +467,12 @@ function resetGame() {
       ["", "", "", "", ""],
       ["", "", "", "", ""],
     ],
+    busy: false,
   }
   Enter.classList.remove("gameOver")
   Enter.textContent = "ENTER"
+
+  ratchetAudio.play()
 
   setTimeout(() => {
     for (let row = 0; row < 6; row++) {
@@ -467,6 +513,8 @@ function main() {
   if (localStorage.getItem("campaign")) {
     campaign = JSON.parse(localStorage.getItem("campaign"))
   }
+  setUpAudio()
+
   drawTileGrid(gameContainer)
   drawKeyboard(keyboardGrid)
   resetGame()
@@ -478,6 +526,7 @@ function main() {
     "You have 6 attempts before lockout.",
     "Good Luck!",
   ])
+  // themeAudio.play()
 }
 
 window.onload = function () {
