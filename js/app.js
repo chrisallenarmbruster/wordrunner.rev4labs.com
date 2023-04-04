@@ -59,7 +59,7 @@ function calculateScore() {
 }
 
 function statTable(gameDetails) {
-  let statStr = "<table class='statTable'>"
+  let statStr = "<hr><table class='statTable'>"
   function statRow(statKey, statValue) {
     return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`
   }
@@ -77,7 +77,39 @@ function statTable(gameDetails) {
   statStr += statRow("Attempts/Rnd", campaign.averageAttempts)
   statStr += statRow("Rounds Played", campaign.gamesPlayed)
 
-  return statStr + "</table>"
+  return statStr + "</table><hr>"
+}
+
+async function getDefinition(word) {
+  let str = ""
+  let definitionArr = []
+  try {
+    let response = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`
+    )
+    let json = await response.json()
+    console.log(json)
+    for (let entry of json) {
+      for (let meaning of entry.meanings) {
+        for (let definition of meaning.definitions) {
+          definitionArr.push(
+            `<i>${meaning.partOfSpeech}:</i>&nbsp;&nbsp;${definition.definition}`
+          )
+          str += `${meaning.partOfSpeech}:${definition.definition}\n\n`
+        }
+      }
+    }
+  } catch (error) {
+    console.log("ERROR:", error)
+    str = "Definition unavailable."
+  }
+  console.log(str)
+  console.log(definitionArr)
+  if (definitionArr.length === 0) {
+    definitionArr.push("Dictionary or definition not available at this time.")
+  }
+  game.wordDefinition = definitionArr
+  return definitionArr
 }
 
 function updateCampaign(gameDetails) {
@@ -95,11 +127,9 @@ function updateCampaign(gameDetails) {
 
   campaign.averageAttempts = parseFloat(
     (
-      campaign.gameDetails
-        .filter((el) => el.outcome === "won")
-        .reduce((acc, cv) => {
-          return acc + cv.attempts
-        }, 0) / campaign.gamesWon
+      campaign.gameDetails.reduce((acc, cv) => {
+        return acc + cv.attempts
+      }, 0) / campaign.gamesPlayed
     ).toFixed(1)
   )
 
@@ -160,14 +190,22 @@ function drawKeyboard(container) {
     [" ", "A", "S", "D", "F", "G", "H", "J", "K", "L", " "],
     ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "⌫"],
   ]
-  drawKeyboardRow(container, 1, keys[0])
-  drawKeyboardRow(container, 2, keys[1])
-  drawKeyboardRow(container, 3, keys[2])
+  const keyboardGrid = document.createElement("div")
+  keyboardGrid.className = "keyboardGrid"
+  keyboardGrid.id = "keyboardGrid"
+
+  container.append(keyboardGrid)
+
+  drawKeyboardRow(keyboardGrid, 1, keys[0])
+  drawKeyboardRow(keyboardGrid, 2, keys[1])
+  drawKeyboardRow(keyboardGrid, 3, keys[2])
 }
 
 function handleKeyButtonClick(key) {
-  console.log("game state", game.gameState)
   if (!uiState.busy) {
+    // clickAudio.pause()
+    clickAudio.currentTime = 0
+    clickAudio.play()
     if (game.gameState === "PLAYING") {
       if (key === "Backspace") {
         deleteLetter()
@@ -211,6 +249,7 @@ function deleteLetter() {
 async function checkRow() {
   const guess = uiState.board[uiState.curRow].join("")
   if (game.gameState === "PLAYING" && uiState.curCol > 4) {
+    clickAudio.pause()
     if (!commonWords.includes(guess.toLowerCase())) {
       invalidAudio.play()
       displayMessage(`${guess} is not a word`)
@@ -239,13 +278,13 @@ async function checkRow() {
             "#ea410b",
           ],
         })
-        // setTimeout(() => {
-        //   Enter.classList.add("gameOver")
-        //   Enter.textContent = "RESET"
-        // }, 3000)
         updateCampaign(gameDetails)
         setTimeout(() => {
-          showModal("Success", [statTable(gameDetails)])
+          showModal("Success", [
+            statTable(gameDetails),
+            "<i>What it means:</>",
+            ...game.wordDefinition,
+          ])
           uiState.busy = false
         }, 1500)
       } else {
@@ -261,13 +300,17 @@ async function checkRow() {
                 : campaign.averageScore,
           }
           updateCampaign(gameDetails)
-          setTimeout(() => {
-            Enter.classList.add("gameOver")
-            Enter.textContent = "RESET"
-          }, 1500)
+          // setTimeout(() => {
+          //   Enter.classList.add("gameOver")
+          //   Enter.textContent = "RESET"
+          // }, 1500)
           console.log("you lost")
           failAudio.play()
-          showModal("Failure", [statTable(gameDetails)])
+          showModal("Failure", [
+            statTable(gameDetails),
+            "<i>What it means:</>",
+            ...game.wordDefinition,
+          ])
         } else {
           console.log("But it's not the secret word, try again")
           uiState.curRow++
@@ -280,6 +323,7 @@ async function checkRow() {
 
 async function revealGuess() {
   return new Promise(async function (resolve, reject) {
+    uiState.busy = true
     let gArr = game.guessStatus()
     console.log(
       "revealGuess() started, guessStatus():",
@@ -300,6 +344,7 @@ async function revealGuess() {
       }, 30)
       // setTimeout(() => colorTiles(word, interval), 10)
       await colorTiles(word, interval)
+      uiState.busy = false
       resolve()
     }
   })
@@ -367,7 +412,6 @@ function drawTileGrid(container, rows = 6, cols = 5) {
 window.addEventListener("keydown", function (event) {
   if (!uiState.busy) {
     if (event.key === "Enter") {
-      event.preventDefault()
       if (modalContainer.style.display != "none") {
         closeButton.click()
       } else {
@@ -376,10 +420,8 @@ window.addEventListener("keydown", function (event) {
     } else if (
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(event.key.toUpperCase())
     ) {
-      event.preventDefault()
       document.getElementById(event.key.toUpperCase()).click()
     } else if (event.key === "Backspace" || event.key === "Delete") {
-      event.preventDefault()
       document.getElementById("Backspace").click()
     }
   }
@@ -401,15 +443,16 @@ function addAudio(id, url, container) {
   audio.type = "audio/mpeg"
   audio.preload = "auto"
   container.append(audio)
+  // window[id] = new Audio(url)
 }
 
 function setUpAudio() {
+  addAudio("clickAudio", "./audio/click.mp3", pageContainer)
   addAudio("compAudio", "./audio/comp.mp3", pageContainer)
   addAudio("successAudio", "./audio/fight.mp3", pageContainer)
   addAudio("failAudio", "./audio/regret.mp3", pageContainer)
   addAudio("invalidAudio", "./audio/invalid.mp3", pageContainer)
   addAudio("ratchetAudio", "./audio/ratchet.mp3", pageContainer)
-  addAudio("themeAudio", "./audio/openingTitle.mp3", pageContainer)
 }
 
 function showModal(title = "Title", content = ["lorem ipsum"]) {
@@ -427,8 +470,6 @@ function showModal(title = "Title", content = ["lorem ipsum"]) {
     successAudio.currentTime = 0
     failAudio.pause()
     failAudio.currentTime = 0
-    themeAudio.pause()
-    themeAudio.currentTime = 0
     if (game.gameState !== "PLAYING") {
       Enter.classList.add("gameOver")
       Enter.textContent = "RESET"
@@ -456,6 +497,7 @@ function showModal(title = "Title", content = ["lorem ipsum"]) {
 function resetGame() {
   game = new Wordal(commonWords[Math.floor(Math.random() * commonWords.length)])
   console.log(game.secretWord)
+  getDefinition(game.secretWord)
   uiState = {
     curRow: 0,
     curCol: 0,
@@ -472,6 +514,7 @@ function resetGame() {
   Enter.classList.remove("gameOver")
   Enter.textContent = "ENTER"
 
+  clickAudio.pause()
   ratchetAudio.play()
 
   setTimeout(() => {
@@ -516,7 +559,7 @@ function main() {
   setUpAudio()
 
   drawTileGrid(gameContainer)
-  drawKeyboard(keyboardGrid)
+  drawKeyboard(keyboardContainer)
   resetGame()
   showModal("Mission Briefing", [
     "Decrypt the code.",
@@ -526,7 +569,6 @@ function main() {
     "You have 6 attempts before lockout.",
     "Good Luck!",
   ])
-  // themeAudio.play()
 }
 
 window.onload = function () {
