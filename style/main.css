@@ -90,7 +90,7 @@ div {
   display: grid;
   place-items: center;
   font-family: "Oxanium", cursive;
-  font-size: 1.75rem;/*changed from 2.25 3/29*/
+  font-size: 1.75rem; /*changed from 2.25 3/29*/
 }
 
 .tileWaterMark {
@@ -103,13 +103,13 @@ div {
   justify-content: center;
   margin: auto; /*added 3/29*/
   margin-top: 0.5em;
-  width:100%;/*added 3/29*/
+  width: 100%; /*added 3/29*/
 }
 
 .keyboardGrid {
   display: grid;
   width: 60vh;
-  width:100%;/*added 3/29*/
+  width: 100%; /*added 3/29*/
   /* grid-template-rows: 3rem 3rem 3rem; */
   grid-template-rows: 1fr 1fr 1fr;
   grid-template-columns: 1fr;
@@ -145,8 +145,8 @@ div {
   font-weight: bolder;
   place-items: center;
   margin: 0.1em;
-  margin:0; /*added 3/29*/
-  padding:0; /*added 3/29*/
+  margin: 0; /*added 3/29*/
+  padding: 0; /*added 3/29*/
   border-radius: 0.5em;
   color: var(--text);
   aspect-ratio: 1 / 1;
@@ -181,7 +181,7 @@ div {
 .gameOver {
   background-color: var(--brBlue1);
   color: var(--default);
-  border: 1px solid var(--brBlue1);:
+  border: 1px solid var(--brBlue1);
 }
 
 .reset {
@@ -201,38 +201,37 @@ div {
 }
 
 .modalContainer {
-  display: none; 
-  position: fixed; 
-  z-index: 1; 
-  padding-top: 100px; 
+  display: none;
+  position: fixed;
+  z-index: 1;
+  padding-top: 100px;
   left: 0;
   top: 0;
-  width: 100%; 
-  height: 100%; 
-  overflow: auto; 
-  background-color: rgb(0,0,0); 
-  background-color: rgba(0,0,0,0.4); 
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modalContent {
   font-family: "Oxanium", cursive;
-  background-color: rgba(99.6,57.3,0,.6);
-  color:var(--brOrange1);
+  background-color: rgba(99.6, 57.3, 0, 0.6);
+  color: var(--brOrange1);
   margin: auto;
   padding: 10px;
-  padding-top:0px;
+  padding-top: 0px;
   width: 80%;
   max-width: 40vh;
-  max-height:47vh;
+  max-height: 47vh;
   font-size: 1.5rem;
-  overflow: auto; 
+  overflow: auto;
 }
 
-.modalContent hr{
+.modalContent hr {
   border: 1px solid var(--brOrange1);
   margin-top: 0;
 }
-
 
 .modalTitle {
   font-family: "Oxanium", cursive;
@@ -242,14 +241,14 @@ div {
 
 .modalContentItem {
   font-family: "Oxanium", cursive;
-  margin:0 0;
-  padding:4px 10px;
+  margin: 0 0;
+  padding: 4px 10px;
   font-size: 1.15rem;
   text-align: left;
 }
 
 .close {
-  color:var(--brOrange1);
+  color: var(--brOrange1);
   float: right;
   font-size: 28px;
   font-weight: bold;
@@ -257,16 +256,16 @@ div {
 
 .close:hover,
 .close:focus {
-  color:var(--brOrange3);
+  color: var(--brOrange3);
   text-decoration: none;
   cursor: pointer;
 }
 
 .statTable {
-  margin: 0 auto .5em;
+  margin: 0 auto 0.5em;
 }
-.statTable td{
-  padding: 0 .75rem;
+.statTable td {
+  padding: 0 0.75rem;
 }
 
 .statNum {
@@ -275,21 +274,20 @@ div {
 
 ::-webkit-scrollbar {
   width: 10px;
-
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(99.6,57.3,0,.50); 
+  background: rgba(99.6, 57.3, 0, 0.5);
 }
- 
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(99.6,57.3,0,1); 
+  background: rgba(99.6, 57.3, 0, 1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--brOrange1)
+  background: var(--brOrange1);
 }
 
 .modalContent {
-  scrollbar-color: rgba(99.6,57.3,0,1) rgba(99.6,57.3,0,.5); 
+  scrollbar-color: rgba(99.6, 57.3, 0, 1) rgba(99.6, 57.3, 0, 0.5);
 }

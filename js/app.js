@@ -53,7 +53,6 @@ function calculateScore() {
     .reduce((acc, cv) => {
       return acc + letterValues[cv]
     }, 0)
-  console.log(wordScore)
 
   return wordScore * 10 ** (6 - uiState.curRow)
 }
@@ -80,36 +79,41 @@ function statTable(gameDetails) {
   return statStr + "</table><hr>"
 }
 
+function buildDefinitionHtmlArr(json) {
+  let definitionArr = []
+  for (let entry of json) {
+    for (let meaning of entry.meanings) {
+      for (let definition of meaning.definitions) {
+        definitionArr.push(
+          `<i>${meaning.partOfSpeech}:</i>&nbsp;&nbsp;${definition.definition}`
+        )
+      }
+    }
+  }
+  if (definitionArr.length === 0) {
+    definitionArr.push("Dictionary or definition not available at this time.")
+  }
+  return definitionArr
+}
+
 async function getDefinition(word) {
-  let str = ""
   let definitionArr = []
   try {
     let response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`
     )
-    let json = await response.json()
-    console.log(json)
-    for (let entry of json) {
-      for (let meaning of entry.meanings) {
-        for (let definition of meaning.definitions) {
-          definitionArr.push(
-            `<i>${meaning.partOfSpeech}:</i>&nbsp;&nbsp;${definition.definition}`
-          )
-          str += `${meaning.partOfSpeech}:${definition.definition}\n\n`
-        }
-      }
+    if (response.ok) {
+      let json = await response.json()
+      definitionArr = buildDefinitionHtmlArr(json)
+    } else {
+      throw new Error("Definition Fetch Failed")
     }
   } catch (error) {
-    console.log("ERROR:", error)
-    str = "Definition unavailable."
+    definitionArr = ["Dictionary or definition not available at this time."]
+  } finally {
+    game.wordDefinition = definitionArr
+    return definitionArr
   }
-  console.log(str)
-  console.log(definitionArr)
-  if (definitionArr.length === 0) {
-    definitionArr.push("Dictionary or definition not available at this time.")
-  }
-  game.wordDefinition = definitionArr
-  return definitionArr
 }
 
 function updateCampaign(gameDetails) {
@@ -120,9 +124,11 @@ function updateCampaign(gameDetails) {
   } else {
     campaign.curStreak = 0
   }
+
   if (campaign.curStreak > campaign.bestStreak) {
     campaign.bestStreak = campaign.curStreak
   }
+
   campaign.gameDetails.push(gameDetails)
 
   campaign.averageAttempts = parseFloat(
@@ -155,7 +161,6 @@ function updateCampaign(gameDetails) {
   }
 
   localStorage.setItem("campaign", JSON.stringify(campaign))
-  console.log(JSON.parse(localStorage.getItem("campaign")))
 }
 
 function drawKey(key) {
@@ -203,15 +208,15 @@ function drawKeyboard(container) {
 
 function handleKeyButtonClick(key) {
   if (!uiState.busy) {
-    // clickAudio.pause()
     clickAudio.currentTime = 0
-    clickAudio.play()
+    clickAudio.play().catch((error) => {
+      /*do nothing - it's just audio*/
+    })
     if (game.gameState === "PLAYING") {
       if (key === "Backspace") {
         deleteLetter()
       } else if (key === "Enter") {
         checkRow()
-        console.log(`checking row: ${key}`)
       } else {
         appendLetter(key)
       }
@@ -240,7 +245,6 @@ function deleteLetter() {
     const tile = document.getElementById(
       `tile-${uiState.curRow}-${uiState.curCol}`
     )
-    // tile.textContent = ""
     tile.innerHTML = '<span class="tileWaterMark">B</span>'
     uiState.board[uiState.curRow][uiState.curCol] = ""
   }
@@ -251,12 +255,13 @@ async function checkRow() {
   if (game.gameState === "PLAYING" && uiState.curCol > 4) {
     clickAudio.pause()
     if (!commonWords.includes(guess.toLowerCase())) {
-      invalidAudio.play()
+      invalidAudio.play().catch((error) => {
+        /*do nothing - it's just audio*/
+      })
       displayMessage(`${guess} is not a word`)
     } else {
       game.submitGuess(guess)
       await revealGuess()
-      console.log("returned from revealGuess()")
       updateKeyboard()
       if (game.secretWord === guess) {
         uiState.curRow++
@@ -267,7 +272,9 @@ async function checkRow() {
           score: calculateScore(),
         }
         uiState.busy = true
-        successAudio.play()
+        successAudio.play().catch((error) => {
+          /*do nothing - it's just audio*/
+        })
         jsConfetti.addConfetti({
           confettiColors: [
             "#17aad8",
@@ -300,19 +307,15 @@ async function checkRow() {
                 : campaign.averageScore,
           }
           updateCampaign(gameDetails)
-          // setTimeout(() => {
-          //   Enter.classList.add("gameOver")
-          //   Enter.textContent = "RESET"
-          // }, 1500)
-          console.log("you lost")
-          failAudio.play()
+          failAudio.play().catch((error) => {
+            /*do nothing - it's just audio*/
+          })
           showModal("Failure", [
             statTable(gameDetails),
             "<i>What it means:</>",
             ...game.wordDefinition,
           ])
         } else {
-          console.log("But it's not the secret word, try again")
           uiState.curRow++
           uiState.curCol = 0
         }
@@ -325,16 +328,11 @@ async function revealGuess() {
   return new Promise(async function (resolve, reject) {
     uiState.busy = true
     let gArr = game.guessStatus()
-    console.log(
-      "revealGuess() started, guessStatus():",
-      gArr,
-      "curRow:",
-      uiState.curRow
-    )
-    compAudio.play()
+    compAudio.play().catch((error) => {
+      /*do nothing - it's just audio*/
+    })
     if (gArr[uiState.curRow]) {
       let word = gArr[uiState.curRow]
-      // console.log(word)
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
       let interval = setInterval(() => {
         for (let col = 0; col < 5; col++) {
@@ -342,7 +340,6 @@ async function revealGuess() {
           tile.textContent = letters[Math.floor(Math.random() * 26)]
         }
       }, 30)
-      // setTimeout(() => colorTiles(word, interval), 10)
       await colorTiles(word, interval)
       uiState.busy = false
       resolve()
@@ -355,7 +352,6 @@ function colorTiles(word, interval) {
     setTimeout(resolve, 1000)
   }).then(function () {
     clearInterval(interval)
-    // updateKeyboard()
     for (let [idx, letter] of word.entries()) {
       let tile = document.getElementById(`tile-${uiState.curRow}-${idx}`)
       tile.textContent = word[idx]["letter"]
@@ -371,10 +367,7 @@ function colorTiles(word, interval) {
 }
 
 function updateKeyboard() {
-  // console.log("stat: ", game.letterStatus)
   for (let [letter, status] of Object.entries(game.letterStatus)) {
-    // console.log(letter, status)
-    // console.log("letter:", letter, "status:", status)
     let key = document.getElementById(letter)
     key.classList.add(
       status === "G"
@@ -437,13 +430,13 @@ function displayMessage(message, time = 3500) {
 }
 
 function addAudio(id, url, container) {
-  let audio = document.createElement("audio")
-  audio.id = id
-  audio.src = url
-  audio.type = "audio/mpeg"
-  audio.preload = "auto"
-  container.append(audio)
-  // window[id] = new Audio(url)
+  // let audio = document.createElement("audio")
+  // audio.id = id
+  // audio.src = url
+  // audio.type = "audio/mpeg"
+  // audio.preload = "auto"
+  // container.append(audio)
+  window[id] = new Audio(url)
 }
 
 function setUpAudio() {
@@ -515,7 +508,9 @@ function resetGame() {
   Enter.textContent = "ENTER"
 
   clickAudio.pause()
-  ratchetAudio.play()
+  ratchetAudio.play().catch((error) => {
+    /*do nothing - it's just audio*/
+  })
 
   setTimeout(() => {
     for (let row = 0; row < 6; row++) {
@@ -557,7 +552,6 @@ function main() {
     campaign = JSON.parse(localStorage.getItem("campaign"))
   }
   setUpAudio()
-
   drawTileGrid(gameContainer)
   drawKeyboard(keyboardContainer)
   resetGame()
