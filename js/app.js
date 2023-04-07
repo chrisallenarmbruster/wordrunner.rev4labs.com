@@ -1,4 +1,4 @@
-// import { Wordal } from "./wordal.js"
+// import { Round } from "./round.js"
 // import { WORDS } from "./words.js"
 
 let game, uiState
@@ -488,7 +488,7 @@ function showModal(title = "Title", content = ["lorem ipsum"]) {
 }
 
 function resetGame() {
-  game = new Wordal(commonWords[Math.floor(Math.random() * commonWords.length)])
+  game = new Round(commonWords[Math.floor(Math.random() * commonWords.length)])
   console.log(game.secretWord)
   getDefinition(game.secretWord)
   uiState = {
