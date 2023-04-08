@@ -1,4 +1,4 @@
-class Round {
+export class Round {
   constructor(secretWord = "guess") {
     this.secretWord = secretWord.toUpperCase()
     this.guesses = []

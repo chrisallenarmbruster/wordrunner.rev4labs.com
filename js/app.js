@@ -1,5 +1,8 @@
-// import { Round } from "./round.js"
-// import { WORDS } from "./words.js"
+"use strict"
+
+import { Round } from "./round.js"
+import { commonWords } from "./commonWords.js"
+import { JSConfetti } from "./js-confetti.js"
 
 let game, uiState
 const jsConfetti = new JSConfetti()
@@ -515,7 +518,7 @@ function resetGame() {
   setTimeout(() => {
     for (let row = 0; row < 6; row++) {
       for (let col = 0; col < 5; col++) {
-        tile = document.getElementById(`tile-${row}-${col}`)
+        let tile = document.getElementById(`tile-${row}-${col}`)
         tile.textContent = ""
         tile.innerHTML = '<span class="tileWaterMark">B</span>'
         tile.className = "tile reset"
@@ -526,7 +529,7 @@ function resetGame() {
   setTimeout(() => {
     for (let row = 0; row < 6; row++) {
       for (let col = 0; col < 5; col++) {
-        tile = document.getElementById(`tile-${row}-${col}`)
+        let tile = document.getElementById(`tile-${row}-${col}`)
         tile.classList.remove("reset")
       }
     }
@@ -534,7 +537,7 @@ function resetGame() {
 
   for (let row = 0; row < 6; row++) {
     for (let col = 0; col < 5; col++) {
-      tile = document.getElementById(`tile-${row}-${col}`)
+      let tile = document.getElementById(`tile-${row}-${col}`)
       tile.classList.add("reset")
     }
   }
