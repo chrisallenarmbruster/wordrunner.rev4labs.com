@@ -1,4 +1,4 @@
-class Campaign {
+export class Campaign {
   constructor() {
     this.gamesPlayed = 0
     this.gamesWon = 0
@@ -27,7 +27,6 @@ class Campaign {
     if (gameDetails.score > this.highScore) {
       this.highScore = gameDetails.score
     }
-
     this.saveToLocalStorage()
   }
 
@@ -60,7 +59,7 @@ class Campaign {
 
   averageScore() {
     if (this.gamesPlayed === 0) return 0
-    Math.round(
+    return Math.round(
       this.gameDetails.reduce((acc, cv) => acc + cv.score, 0) / this.gamesPlayed
     )
   }
@@ -90,7 +89,6 @@ class Campaign {
       statStr += statRow("Attempts", gameDetails.attempts)
       statStr += statRow("Round Score", gameDetails.score)
     }
-
     statStr += statRow("Average Score", this.averageScore())
     statStr += statRow("High Score", this.highScore)
     statStr += statRow("Winning %", this.winPercentage())
