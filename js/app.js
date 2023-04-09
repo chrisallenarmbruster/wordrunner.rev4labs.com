@@ -1,170 +1,14 @@
 "use strict"
 
+import { Campaign } from "./campaign.js"
 import { Round } from "./round.js"
-import { commonWords } from "./commonWords.js"
+import { WORDS } from "./words.js"
 import { JSConfetti } from "./js-confetti.js"
+// import { UI } from "./ui.js"
 
-let game, uiState
+let game, uiState, ui
+const campaign = new Campaign()
 const jsConfetti = new JSConfetti()
-
-let campaign = {
-  gamesPlayed: 0,
-  gamesWon: 0,
-  winPercentage: 0,
-  averageAttempts: 0,
-  sluggingPercentage: 0,
-  highScore: 0,
-  averageScore: 0,
-  curStreak: 0,
-  bestStreak: 0,
-  gameDetails: [],
-}
-
-function calculateScore() {
-  let letterValues = {
-    a: 1,
-    b: 3,
-    c: 3,
-    d: 2,
-    e: 1,
-    f: 4,
-    g: 2,
-    h: 4,
-    i: 1,
-    j: 8,
-    k: 5,
-    l: 1,
-    m: 3,
-    n: 1,
-    o: 1,
-    p: 3,
-    q: 10,
-    r: 1,
-    s: 1,
-    t: 1,
-    u: 1,
-    v: 4,
-    w: 4,
-    x: 8,
-    y: 4,
-    z: 10,
-  }
-
-  let wordScore = game.secretWord
-    .toLowerCase()
-    .split("")
-    .reduce((acc, cv) => {
-      return acc + letterValues[cv]
-    }, 0)
-
-  return wordScore * 10 ** (6 - uiState.curRow)
-}
-
-function statTable(gameDetails) {
-  let statStr = "<hr><table class='statTable'>"
-  function statRow(statKey, statValue) {
-    return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`
-  }
-  if (gameDetails) {
-    statStr += statRow("Word", gameDetails.word)
-    statStr += statRow("Attempts", gameDetails.attempts)
-    statStr += statRow("Round Score", gameDetails.score)
-  }
-  statStr += statRow("Average Score", campaign.averageScore)
-  statStr += statRow("High Score", campaign.highScore)
-  statStr += statRow("Winning %", campaign.winPercentage)
-  statStr += statRow("Slugging %", campaign.sluggingPercentage)
-  statStr += statRow("Best Streak", campaign.bestStreak)
-  statStr += statRow("Current Streak", campaign.curStreak)
-  statStr += statRow("Attempts/Rnd", campaign.averageAttempts)
-  statStr += statRow("Rounds Played", campaign.gamesPlayed)
-
-  return statStr + "</table><hr>"
-}
-
-function buildDefinitionHtmlArr(json) {
-  let definitionArr = []
-  for (let entry of json) {
-    for (let meaning of entry.meanings) {
-      for (let definition of meaning.definitions) {
-        definitionArr.push(
-          `<i>${meaning.partOfSpeech}:</i>&nbsp;&nbsp;${definition.definition}`
-        )
-      }
-    }
-  }
-  if (definitionArr.length === 0) {
-    definitionArr.push("Dictionary or definition not available at this time.")
-  }
-  return definitionArr
-}
-
-async function getDefinition(word) {
-  let definitionArr = []
-  try {
-    let response = await fetch(
-      `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`
-    )
-    if (response.ok) {
-      let json = await response.json()
-      definitionArr = buildDefinitionHtmlArr(json)
-    } else {
-      throw new Error("Definition Fetch Failed")
-    }
-  } catch (error) {
-    definitionArr = ["Dictionary or definition not available at this time."]
-  } finally {
-    game.wordDefinition = definitionArr
-    return definitionArr
-  }
-}
-
-function updateCampaign(gameDetails) {
-  campaign.gamesPlayed++
-  if (gameDetails.outcome === "won") {
-    campaign.gamesWon++
-    campaign.curStreak++
-  } else {
-    campaign.curStreak = 0
-  }
-
-  if (campaign.curStreak > campaign.bestStreak) {
-    campaign.bestStreak = campaign.curStreak
-  }
-
-  campaign.gameDetails.push(gameDetails)
-
-  campaign.averageAttempts = parseFloat(
-    (
-      campaign.gameDetails.reduce((acc, cv) => {
-        return acc + cv.attempts
-      }, 0) / campaign.gamesPlayed
-    ).toFixed(1)
-  )
-
-  campaign.winPercentage = Math.round(
-    (100 * campaign.gamesWon) / campaign.gamesPlayed
-  )
-
-  campaign.sluggingPercentage = Math.round(
-    (100 *
-      campaign.gameDetails
-        .filter((el) => el.outcome === "won")
-        .reduce((acc, cv) => acc + 7 - cv.attempts, 0)) /
-      campaign.gamesPlayed
-  )
-
-  campaign.averageScore = Math.round(
-    campaign.gameDetails.reduce((acc, cv) => acc + cv.score, 0) /
-      campaign.gamesPlayed
-  )
-
-  if (gameDetails.score > campaign.highScore) {
-    campaign.highScore = gameDetails.score
-  }
-
-  localStorage.setItem("campaign", JSON.stringify(campaign))
-}
 
 function drawKey(key) {
   const keyButton = document.createElement("button")
@@ -257,7 +101,7 @@ async function checkRow() {
   const guess = uiState.board[uiState.curRow].join("")
   if (game.gameState === "PLAYING" && uiState.curCol > 4) {
     clickAudio.pause()
-    if (!commonWords.includes(guess.toLowerCase())) {
+    if (!WORDS.includes(guess.toLowerCase())) {
       invalidAudio.play().catch((error) => {
         /*do nothing - it's just audio*/
       })
@@ -272,7 +116,7 @@ async function checkRow() {
           outcome: "won",
           attempts: uiState.curRow,
           word: game.secretWord,
-          score: calculateScore(),
+          score: game.wordBasePointValue() * 10 ** (6 - uiState.curRow),
         }
         uiState.busy = true
         successAudio.play().catch((error) => {
@@ -288,10 +132,10 @@ async function checkRow() {
             "#ea410b",
           ],
         })
-        updateCampaign(gameDetails)
+        campaign.updateCampaign(gameDetails)
         setTimeout(() => {
           showModal("Success", [
-            statTable(gameDetails),
+            campaign.createCampaignSummary(gameDetails),
             "<i>What it means:</>",
             ...game.wordDefinition,
           ])
@@ -299,22 +143,23 @@ async function checkRow() {
         }, 1500)
       } else {
         if (uiState.curRow >= 5) {
+          console.log(campaign.averageScore())
           uiState.curRow++
           let gameDetails = {
             outcome: "lost",
             attempts: uiState.curRow,
             word: game.secretWord,
             score:
-              campaign.averageScore > 0
-                ? -campaign.averageScore
-                : campaign.averageScore,
+              campaign.averageScore() > 0
+                ? -1 * campaign.averageScore()
+                : campaign.averageScore(),
           }
-          updateCampaign(gameDetails)
+          campaign.updateCampaign(gameDetails)
           failAudio.play().catch((error) => {
             /*do nothing - it's just audio*/
           })
           showModal("Failure", [
-            statTable(gameDetails),
+            campaign.createCampaignSummary(gameDetails),
             "<i>What it means:</>",
             ...game.wordDefinition,
           ])
@@ -390,7 +235,7 @@ function drawTile(container, row, col, value = "") {
   tile.className = "tile"
   tile.textContent = value
   container.appendChild(tile)
-  return tile
+  // return tile
 }
 
 function drawTileGrid(container, rows = 6, cols = 5) {
@@ -433,12 +278,6 @@ function displayMessage(message, time = 3500) {
 }
 
 function addAudio(id, url, container) {
-  // let audio = document.createElement("audio")
-  // audio.id = id
-  // audio.src = url
-  // audio.type = "audio/mpeg"
-  // audio.preload = "auto"
-  // container.append(audio)
   window[id] = new Audio(url)
 }
 
@@ -490,10 +329,48 @@ function showModal(title = "Title", content = ["lorem ipsum"]) {
   modalContainer.style.display = "block"
 }
 
+function iterateTiles(callback) {
+  for (let row = 0; row < 6; row++) {
+    for (let col = 0; col < 5; col++) {
+      callback(document.getElementById(`tile-${row}-${col}`))
+    }
+  }
+}
+
+function flipAndResetTiles() {
+  clickAudio.pause()
+  ratchetAudio.play().catch((error) => {
+    /*do nothing - it's just audio*/
+  })
+
+  setTimeout(() => {
+    iterateTiles((tile) => {
+      tile.classList.remove("tileHit", "tileClose", "tileMiss")
+      tile.innerHTML = '<span class="tileWaterMark">B</span>'
+    })
+  }, 500)
+
+  setTimeout(() => {
+    iterateTiles((tile) => {
+      tile.classList.remove("reset")
+    })
+  }, 1000)
+
+  iterateTiles((tile) => {
+    tile.classList.add("reset")
+  })
+}
+
+function resetKeyboard() {
+  for (let letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")) {
+    let key = document.getElementById(letter)
+    key.className = "key"
+  }
+}
+
 function resetGame() {
-  game = new Round(commonWords[Math.floor(Math.random() * commonWords.length)])
+  game = new Round(WORDS[Math.floor(Math.random() * WORDS.length)])
   console.log(game.secretWord)
-  getDefinition(game.secretWord)
   uiState = {
     curRow: 0,
     curCol: 0,
@@ -510,51 +387,18 @@ function resetGame() {
   Enter.classList.remove("gameOver")
   Enter.textContent = "ENTER"
 
-  clickAudio.pause()
-  ratchetAudio.play().catch((error) => {
-    /*do nothing - it's just audio*/
-  })
+  flipAndResetTiles()
+  resetKeyboard()
 
-  setTimeout(() => {
-    for (let row = 0; row < 6; row++) {
-      for (let col = 0; col < 5; col++) {
-        let tile = document.getElementById(`tile-${row}-${col}`)
-        tile.textContent = ""
-        tile.innerHTML = '<span class="tileWaterMark">B</span>'
-        tile.className = "tile reset"
-      }
-    }
-  }, 500)
-
-  setTimeout(() => {
-    for (let row = 0; row < 6; row++) {
-      for (let col = 0; col < 5; col++) {
-        let tile = document.getElementById(`tile-${row}-${col}`)
-        tile.classList.remove("reset")
-      }
-    }
-  }, 1000)
-
-  for (let row = 0; row < 6; row++) {
-    for (let col = 0; col < 5; col++) {
-      let tile = document.getElementById(`tile-${row}-${col}`)
-      tile.classList.add("reset")
-    }
-  }
-  for (let letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")) {
-    let key = document.getElementById(letter)
-    key.className = "key"
-  }
   header.className = "header"
   header.textContent = "wordBrunner"
 }
 
 function main() {
   // localStorage.clear()
-  if (localStorage.getItem("campaign")) {
-    campaign = JSON.parse(localStorage.getItem("campaign"))
-  }
+  campaign.restoreFromLocalStorage()
   setUpAudio()
+  // ui = new UI(pageContainer)
   drawTileGrid(gameContainer)
   drawKeyboard(keyboardContainer)
   resetGame()

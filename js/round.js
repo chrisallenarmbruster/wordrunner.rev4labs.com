@@ -1,11 +1,42 @@
+const LETTER_VALUES = {
+  a: 1,
+  b: 3,
+  c: 3,
+  d: 2,
+  e: 1,
+  f: 4,
+  g: 2,
+  h: 4,
+  i: 1,
+  j: 8,
+  k: 5,
+  l: 1,
+  m: 3,
+  n: 1,
+  o: 1,
+  p: 3,
+  q: 10,
+  r: 1,
+  s: 1,
+  t: 1,
+  u: 1,
+  v: 4,
+  w: 4,
+  x: 8,
+  y: 4,
+  z: 10,
+}
+
 export class Round {
   constructor(secretWord = "guess") {
     this.secretWord = secretWord.toUpperCase()
+    this.wordDefinition = []
     this.guesses = []
     this.letterStatus = {}
     this.guessesRemaining = 6
     this.gameState = "PLAYING" //PLAYING, WON, LOST
     this.resetLetterStatus()
+    this.getDefinition()
   }
 
   submitGuess(word) {
@@ -80,6 +111,52 @@ export class Round {
       return guessStatArr
     })
   }
-}
 
-// export { Round }
+  async getDefinition() {
+    let definitionArr = []
+    try {
+      let response = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${this.secretWord.toLowerCase()}`
+      )
+      if (response.ok) {
+        let json = await response.json()
+        definitionArr = this.unpackDefinition(json)
+      } else {
+        throw new Error("Definition Fetch Failed")
+      }
+    } catch (error) {
+      definitionArr = ["Dictionary or definition not available at this time."]
+    } finally {
+      this.wordDefinition = definitionArr
+      return definitionArr
+    }
+  }
+
+  unpackDefinition(json) {
+    let definitionArr = []
+    for (let entry of json) {
+      for (let meaning of entry.meanings) {
+        for (let definition of meaning.definitions) {
+          definitionArr.push(
+            `<i>${meaning.partOfSpeech}:</i>&nbsp;&nbsp;${definition.definition}`
+          )
+        }
+      }
+    }
+    if (definitionArr.length === 0) {
+      definitionArr.push("Dictionary or definition not available at this time.")
+    }
+    return definitionArr
+  }
+
+  wordBasePointValue() {
+    let wordBaseScore = this.secretWord
+      .toLowerCase()
+      .split("")
+      .reduce((acc, cv) => {
+        return acc + LETTER_VALUES[cv]
+      }, 0)
+
+    return wordBaseScore
+  }
+}
