@@ -7,6 +7,7 @@ export class Campaign {
     this.curStreak = 0
     this.gameDetails = []
     this.version = 1
+    this.restoreFromLocalStorage()
   }
 
   updateCampaign(gameDetails) {

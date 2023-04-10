@@ -158,8 +158,8 @@ div {
   aspect-ratio: 1 / 2;
 }
 
-#Backspace,
-#Enter {
+#BACKSPACE,
+#ENTER {
   aspect-ratio: 3 / 2;
   font-size: 0.6rem;
 }
