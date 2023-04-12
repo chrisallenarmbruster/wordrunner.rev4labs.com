@@ -61,11 +61,7 @@ function winRoutine() {
   setTimeout(() => {
     ui.showModal(
       "Success",
-      [
-        campaign.createCampaignSummary(gameDetails),
-        "<i>What it means:</>",
-        ...game.wordDefinition,
-      ],
+      [tablize(gameDetails), "<i>What it means:</>", ...game.wordDefinition],
       game.gameState
     )
     ui.busy = false
@@ -89,13 +85,27 @@ function loseRoutine() {
   })
   ui.showModal(
     "Failure",
-    [
-      campaign.createCampaignSummary(gameDetails),
-      "<i>What it means:</>",
-      ...game.wordDefinition,
-    ],
+    [tablize(gameDetails), "<i>What it means:</>", ...game.wordDefinition],
     game.gameState
   )
+}
+
+function tablize(gameDetails) {
+  let statStr = "<hr><table class='statTable'>"
+
+  function statRow(statKey, statValue) {
+    return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`
+  }
+
+  if (gameDetails) {
+    statStr = `${statStr}${statRow("Word", gameDetails.word)}`
+    statStr = `${statStr}${statRow("Attempts", gameDetails.attempts)}`
+    statStr = `${statStr}${statRow("Round Score", gameDetails.score)}`
+  }
+  for (let el of campaign.campaignSummary()) {
+    statStr = `${statStr}${statRow(el.label, el.value)}`
+  }
+  return `${statStr}</table><hr>`
 }
 
 function instructions() {
