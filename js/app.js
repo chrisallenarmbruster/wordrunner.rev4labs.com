@@ -61,7 +61,11 @@ function winRoutine() {
   setTimeout(() => {
     ui.showModal(
       "Success",
-      [tablize(gameDetails), "<i>What it means:</>", ...game.wordDefinition],
+      [
+        tablize(gameDetails),
+        "<i>What it means:</>",
+        ...formatDefinition(game.wordDefinition),
+      ],
       game.gameState
     )
     ui.busy = false
@@ -85,9 +89,21 @@ function loseRoutine() {
   })
   ui.showModal(
     "Failure",
-    [tablize(gameDetails), "<i>What it means:</>", ...game.wordDefinition],
+    [
+      tablize(gameDetails),
+      "<i>What it means:</>",
+      ...formatDefinition(game.wordDefinition),
+    ],
     game.gameState
   )
+}
+
+function formatDefinition(packedDefinition) {
+  return packedDefinition.map((el) => {
+    let htmlString = ""
+    if (el.partOfSpeech) htmlString = `<i>${el.partOfSpeech}:</i>&nbsp;&nbsp;`
+    return `${htmlString}${el.definition}`
+  })
 }
 
 function tablize(gameDetails) {
