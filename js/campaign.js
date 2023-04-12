@@ -78,27 +78,16 @@ export class Campaign {
     }
   }
 
-  createCampaignSummary(gameDetails) {
-    let statStr = "<hr><table class='statTable'>"
-
-    function statRow(statKey, statValue) {
-      return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`
-    }
-
-    if (gameDetails) {
-      statStr += statRow("Word", gameDetails.word)
-      statStr += statRow("Attempts", gameDetails.attempts)
-      statStr += statRow("Round Score", gameDetails.score)
-    }
-    statStr += statRow("Average Score", this.averageScore())
-    statStr += statRow("High Score", this.highScore)
-    statStr += statRow("Winning %", this.winPercentage())
-    statStr += statRow("Slugging %", this.sluggingPercentage())
-    statStr += statRow("Best Streak", this.bestStreak)
-    statStr += statRow("Current Streak", this.curStreak)
-    statStr += statRow("Attempts/Rnd", this.averageAttempts())
-    statStr += statRow("Rounds Played", this.gamesPlayed)
-
-    return statStr + "</table><hr>"
+  campaignSummary() {
+    let summary = []
+    summary.push({ label: "Average Score", value: this.averageScore() })
+    summary.push({ label: "High Score", value: this.highScore })
+    summary.push({ label: "Winning %", value: this.winPercentage() })
+    summary.push({ label: "Slugging %", value: this.sluggingPercentage() })
+    summary.push({ label: "Best Streak", value: this.bestStreak })
+    summary.push({ label: "Current Streak", value: this.curStreak })
+    summary.push({ label: "Attempts/Rnd", value: this.averageAttempts() })
+    summary.push({ label: "Rounds Played", value: this.gamesPlayed })
+    return summary
   }
 }

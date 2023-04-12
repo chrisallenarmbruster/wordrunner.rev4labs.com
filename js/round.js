@@ -125,7 +125,12 @@ export class Round {
         throw new Error("Definition Fetch Failed")
       }
     } catch (error) {
-      definitionArr = ["Dictionary or definition not available at this time."]
+      definitionArr = [
+        {
+          partOfSpeech: null,
+          definition: "Dictionary or definition not available at this time.",
+        },
+      ]
     } finally {
       this.wordDefinition = definitionArr
       return definitionArr
@@ -137,14 +142,18 @@ export class Round {
     for (let entry of json) {
       for (let meaning of entry.meanings) {
         for (let definition of meaning.definitions) {
-          definitionArr.push(
-            `<i>${meaning.partOfSpeech}:</i>&nbsp;&nbsp;${definition.definition}`
-          )
+          definitionArr.push({
+            partOfSpeech: meaning.partOfSpeech,
+            definition: definition.definition,
+          })
         }
       }
     }
     if (definitionArr.length === 0) {
-      definitionArr.push("Dictionary or definition not available at this time.")
+      definitionArr.push({
+        partOfSpeech: null,
+        definition: "Dictionary or definition not available at this time.",
+      })
     }
     return definitionArr
   }
