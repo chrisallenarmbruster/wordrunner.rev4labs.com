@@ -126,8 +126,9 @@ export class UI {
   }
 
   drawKey(key) {
-    const keyButton = document.createElement("button")
+    const keyButton = document.createElement("span")
     keyButton.id = key === "⌫" ? "BACKSPACE" : key === "ENTER" ? "ENTER" : key
+    keyButton.role = "button"
     keyButton.className = key === " " ? "keySpacer" : "key"
     keyButton.textContent = key
     return keyButton
@@ -251,15 +252,10 @@ export class UI {
   }
 
   showModal(title = "Title", content = ["lorem ipsum"], gameState) {
-    let modalContent = document.createElement("div")
-    modalContent.id = "modalContent"
-    modalContent.className = "modalContent"
-
-    let closeButton = document.createElement("span")
-    closeButton.id = "closeButton"
-    closeButton.className = "close"
-    closeButton.textContent = `x`
-    closeButton.addEventListener("click", () => {
+    const modalCloseHandler = (event) => {
+      if (event.type === "touchstart") {
+        event.preventDefault()
+      }
       modalContainer.style.display = "none"
       this.successAudio.pause()
       this.successAudio.currentTime = 0
@@ -269,7 +265,18 @@ export class UI {
         ENTER.classList.add("gameOver")
         ENTER.textContent = "RESET"
       }
-    })
+    }
+
+    let modalContent = document.createElement("div")
+    modalContent.id = "modalContent"
+    modalContent.className = "modalContent"
+
+    let closeButton = document.createElement("span")
+    closeButton.id = "closeButton"
+    closeButton.className = "close"
+    closeButton.textContent = `x`
+    closeButton.addEventListener("click", modalCloseHandler)
+    closeButton.addEventListener("touchstart", modalCloseHandler)
     modalContent.appendChild(closeButton)
 
     let modalTitle = document.createElement("h4")
