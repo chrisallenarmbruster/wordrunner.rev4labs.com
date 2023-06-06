@@ -1,6 +1,5 @@
 :root {
   --default: #121213;
-  --defaultRGB: 18, 18, 19;
   --text: #ffffff;
   --gray1: #4a4a4c;
   --gray2: #2a2a2c;
@@ -8,10 +7,9 @@
   --brBlue2: #017cb0;
   --brBlue3: #0b61a8;
   --brOrange1: #fe9200;
-  --brOrange1RGB: 254, 146, 0;
+  /*ee610a*/
   --brOrange2: #ee610a;
   --brOrange3: #ea410b;
-  --
 }
 
 @font-face {
@@ -33,19 +31,35 @@ div {
   padding: 0;
 }
 
-.pageContainer {
-  display: grid;
-  text-align: center;
-  margin: 1cqw auto;
+.supercontainer {
+  display: flex;
   min-width: 320px;
   max-width: 540px;
-  /* three rows: header, tiles, keyboard */
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto 1fr;
+  margin: 1cqw auto;
   container-type: inline-size;
 }
 
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  text-align: center;
+  /*margin: 1cqw auto;
+  min-width: 320px;
+  max-width: 540px;*/
+  width: 100%;
+  justify-content: space-between;
+  /*grid-template-columns: 1fr;*/
+  /*grid-template-rows: auto auto 1fr;*/
+  /*grid-auto-rows: auto;*/
+  container-type: inline-size;
+  height: 155cqw;
+}
+
 .header {
+  display: flex;
+  flex: 0 1 auto;
+  justify-content: center;
   color: var(--brOrange2);
   font-family: "Blade Runner";
   font-size: 8cqw;
@@ -75,6 +89,7 @@ div {
 .gameContainer {
   display: flex;
   justify-content: center;
+  flex: 0 1 auto;
   width: 100cqw;
   margin: auto;
   pointer-events: none;
@@ -111,6 +126,7 @@ div {
 
 .keyboardContainer {
   display: flex;
+  flex: 0 1 auto;
   justify-content: center;
   margin: auto;
   margin-top: 2cqw;
@@ -225,12 +241,12 @@ div {
   bottom: 0;
   width: 100cqw;
   overflow: auto;
-  background-color: rgba(var(--defaultRGB), 0.6);
+  background-color: rgba(18, 18, 19, 0.6);
 }
 
 .modalContent {
   font-family: "Oxanium", cursive;
-  background-color: rgba(var(--brOrange1RGB), 0.3);
+  background-color: rgba(254, 146, 0, 0.3);
   color: var(--brOrange1);
   margin: auto;
   padding: 1.5cqw;
@@ -292,11 +308,11 @@ div {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(var(--brOrange1RGB), 0.2);
+  background: rgba(254, 146, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(var(--brOrange1RGB), 0.4);
+  background: rgba(254, 146, 0, 0.4);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -304,5 +320,5 @@ div {
 }
 
 .modalContent {
-  scrollbar-color: rgba(var(--brOrange1RGB), 0.6) rgba(var(--brOrange1RGB), 0.1);
+  scrollbar-color: rgba(254, 146, 0, 0.6) rgba(254, 146, 0, 0.1);
 }
