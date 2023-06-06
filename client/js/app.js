@@ -1,5 +1,6 @@
 "use strict"
 
+import "../style/main.css"
 import { Campaign } from "./campaign.js"
 import { Round } from "./round.js"
 import { UI } from "./ui.js"

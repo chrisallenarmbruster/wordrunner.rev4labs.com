@@ -1,3 +1,11 @@
+import audioFileClick from "../audio/click.mp3"
+import audioFileComp from "../audio/comp.mp3"
+import audioFileSuccess from "../audio/fight.mp3"
+import audioFileFail from "../audio/regret.mp3"
+import audioFileInvalid from "../audio/invalid.mp3"
+import audioFileRatchet from "../audio/ratchet.mp3"
+import "../style/main.css"
+
 export class UI {
   constructor(container) {
     this.initialUiSetup(container)
@@ -41,12 +49,18 @@ export class UI {
   }
 
   audioSetup() {
-    this.clickAudio = new Audio("./audio/click.mp3")
-    this.compAudio = new Audio("./audio/comp.mp3")
-    this.successAudio = new Audio("./audio/fight.mp3")
-    this.failAudio = new Audio("./audio/regret.mp3")
-    this.invalidAudio = new Audio("./audio/invalid.mp3")
-    this.ratchetAudio = new Audio("./audio/ratchet.mp3")
+    this.clickAudio = new Audio()
+    this.clickAudio.src = audioFileClick
+    this.compAudio = new Audio()
+    this.compAudio.src = audioFileComp
+    this.successAudio = new Audio()
+    this.successAudio.src = audioFileSuccess
+    this.failAudio = new Audio()
+    this.failAudio.src = audioFileFail
+    this.invalidAudio = new Audio()
+    this.invalidAudio.src = audioFileInvalid
+    this.ratchetAudio = new Audio()
+    this.ratchetAudio.src = audioFileRatchet
   }
 
   reset() {
@@ -140,6 +154,11 @@ export class UI {
 
     const keyboardRowGrid = document.createElement("div")
     keyboardRowGrid.id = `keyboardRow${row}`
+    //Following 3 rows added to prevent webpack PurgeCSS from removing the classes from CSS,
+    //as it is not smart enough to interpret the template literal that follows.
+    keyboardRowGrid.className = `keyboardRow1`
+    keyboardRowGrid.className = `keyboardRow2`
+    keyboardRowGrid.className = `keyboardRow3`
     keyboardRowGrid.className = `keyboardRow${row}`
 
     for (let key of keys) {
