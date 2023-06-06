@@ -62,7 +62,7 @@ function winRoutine() {
     ui.showModal(
       "Success",
       [
-        tablize(gameDetails),
+        tablizeStats(gameDetails),
         "<i>What it means:</>",
         ...formatDefinition(game.wordDefinition),
       ],
@@ -90,7 +90,7 @@ function loseRoutine() {
   ui.showModal(
     "Failure",
     [
-      tablize(gameDetails),
+      tablizeStats(gameDetails),
       "<i>What it means:</>",
       ...formatDefinition(game.wordDefinition),
     ],
@@ -106,7 +106,7 @@ function formatDefinition(packedDefinition) {
   })
 }
 
-function tablize(gameDetails) {
+function tablizeStats(gameDetails) {
   let statStr = "<hr><table class='statTable'>"
 
   function statRow(statKey, statValue) {
@@ -134,6 +134,13 @@ function instructions() {
       "Orange indicates right letter in wrong position.",
       "You have 6 attempts before lockout.",
       "Good Luck!",
+      // "&nbsp;&nbsp;",
+      tablizeStats(),
+      "The score calculation starts with the raw scrabble word " +
+        "value and is then multiplied by 10 for every unused attempt. " +
+        "For example, if the word was SMART and it was solved on the " +
+        "fourth attempt, the score would be the raw word value of 7 multiplied " +
+        "by 10 twice, once for each of the two unused attempts: 7 x 10 x 10 = 700.",
     ],
     game.gameState
   )
@@ -152,9 +159,17 @@ window.addEventListener("keydown", function (event) {
   if (event.key === "Delete") document.getElementById("BACKSPACE").click()
 })
 
-pageContainer.addEventListener("click", (event) => {
-  if (!(event.target.nodeName === "BUTTON")) return
+pageContainer.addEventListener("touchstart", touchAndClickHandler)
+
+pageContainer.addEventListener("click", touchAndClickHandler)
+
+function touchAndClickHandler(event) {
+  if (!(event.target.nodeName === "SPAN")) return
   if (ui.busy) return
+
+  if (event.type === "touchstart") {
+    event.preventDefault()
+  }
 
   ui.clickAudio.currentTime = 0
   ui.clickAudio.play().catch((error) => {
@@ -171,7 +186,7 @@ pageContainer.addEventListener("click", (event) => {
   }
 
   if (game.gameState !== "PLAYING" && key === "ENTER") newRound()
-})
+}
 
 function newRound() {
   game = new Round(WORDS[Math.floor(Math.random() * WORDS.length)])
