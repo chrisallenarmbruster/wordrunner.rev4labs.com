@@ -5,7 +5,8 @@ import { Campaign } from "./campaign.js"
 import { Round } from "./round.js"
 import { UI } from "./ui.js"
 import { WORDS } from "./words.js"
-import { JSConfetti } from "./js-confetti.js"
+import { WORDS_SUPPLEMENT } from "./words-supplement.js"
+import JSConfetti from "js-confetti"
 
 let game, ui, campaign
 const jsConfetti = new JSConfetti()
@@ -13,7 +14,10 @@ const jsConfetti = new JSConfetti()
 async function checkRow() {
   const guess = ui.board[ui.curRow].join("")
   ui.clickAudio.pause()
-  if (!WORDS.includes(guess.toLowerCase())) {
+  if (
+    !WORDS.includes(guess.toUpperCase()) &&
+    !WORDS_SUPPLEMENT.includes(guess.toUpperCase())
+  ) {
     ui.invalidAudio.play().catch((error) => {
       /*do nothing - it's just audio*/
     })

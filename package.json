@@ -5,7 +5,9 @@
   "main": "./js/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack"
+    "build": "webpack",
+    "build:dev": "npm run build -- --watch --mode=development",
+    "start:dev": "npm run build:dev & nodemon server/index.js --ignore client/ --ignore public/"
   },
   "repository": {
     "type": "git",
@@ -18,7 +20,8 @@
   },
   "homepage": "https://github.com/chrisallenarmbruster/wordal-web#readme",
   "dependencies": {
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "js-confetti": "^0.11.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
