@@ -14,7 +14,14 @@
 
 @font-face {
   font-family: "Blade Runner";
-  src: url(./BLADRMF_.TTF);
+  src: url(../fonts/BLADRMF_.TTF);
+}
+
+@font-face {
+  font-family: "Oxanium";
+  font-style: normal;
+  font-weight: normal;
+  src: url("../fonts/Oxanium-VariableFont_wght.ttf");
 }
 
 html,
