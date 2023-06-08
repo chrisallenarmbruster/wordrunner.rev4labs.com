@@ -10,45 +10,27 @@ const PATHS = {
 }
 
 module.exports = {
-  mode: "development", //or production
-  entry: {
-    main: path.resolve(__dirname, "client/js/app.js"),
-  },
+  entry: "./client/js/app.js",
   output: {
+    filename: "bundle.js",
     path: path.resolve(__dirname, "public"),
-    filename: "[name].[contenthash].js",
-    clean: true,
-    // assetModuleFilename: "[name].[contenthash][ext]",
     publicPath: "./", // this tells it where to start the path for asset/resource types below
   },
-  devtool: "inline-source-map",
-  // devServer: {
-  //   static: { directory: path.resolve(__dirname, "public") },
-  //   port: 3000,
-  //   compress: true,
-  //   open: true,
-  //   hot: true,
-  //   watchFiles: [
-  //     path.resolve(__dirname, "public"),
-  //     path.resolve(__dirname, "client"),
-  //   ],
-  // },
   module: {
     rules: [
       {
         test: /\.(scss|css)$/i,
         use: [
-          "style-loader",
-          // use plug-in below instead of "style-loader" above to produce separate css file.
-          // Purgecss plugin works w/ plugin below, but style-loader does not.
-          // Style-loader may be better for dev, since it works well when watching files for changes.
-          // {
-          //   loader: MiniCssExtractPlugin.loader,
-          //   options: {
-          //     publicPath: "../", //this informs of the relative path to the "asset/resource" loaders below
-          //   },
-          // },
+          // "style-loader",
+          // use plug-in below instead of "style-loader" above to produce separate css file
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: "../", //this informs of the relative path to the "asset/resource" loaders below
+            },
+          },
           "css-loader",
+          //added for postcss processing
           {
             loader: "postcss-loader",
             options: {
@@ -57,6 +39,7 @@ module.exports = {
               },
             },
           },
+          //added for sass (bootstrap needs as well)
           {
             loader: "sass-loader",
           },
@@ -66,24 +49,24 @@ module.exports = {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: "asset/resource",
         generator: {
-          filename: "images/[name].[contenthash][ext][query]",
+          filename: "images/[hash][ext][query]",
         },
       },
       {
         test: /\.(ogg|mp3|wav)$/i,
         type: "asset/resource",
         generator: {
-          filename: "audio/[name].[contenthash][ext][query]",
+          filename: "audio/[hash][ext][query]",
         },
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: "asset/resource",
         generator: {
-          filename: "fonts/[name].[contenthash][ext][query]",
+          filename: "fonts/[hash][ext][query]",
         },
       },
-      {ee610a
+      {
         test: /\.html$/,
         use: [
           {
@@ -96,10 +79,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       title: "custom template",
-      filename: "index.html",
-      template: path.resolve(__dirname, "client/index.html"),
+      template: "./client/index.html",
     }),
-    new MiniCssExtractPlugin({ filename: "css/style.[contenthash].css" }),
+    new MiniCssExtractPlugin({ filename: "css/style.css" }),
     new PurgeCSSPlugin({
       paths: glob.sync(`${PATHS.src}/**/*`, { nodir: true }),
     }),
