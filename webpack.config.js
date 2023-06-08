@@ -83,7 +83,7 @@ module.exports = {
           filename: "fonts/[name].[contenthash][ext][query]",
         },
       },
-      {ee610a
+      {
         test: /\.html$/,
         use: [
           {
