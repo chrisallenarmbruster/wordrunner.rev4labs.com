@@ -42,7 +42,7 @@ node_modules/
 jspm_packages/
 
 # Distribution directories
-public/
+
 dist/
 
 # TypeScript v1 declaration files
