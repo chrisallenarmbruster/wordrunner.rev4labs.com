@@ -29,7 +29,7 @@ The styling of WordRunner is deeply influenced by the distinctive visual and the
 - **Futuristic Elements**: Emulating the high-tech, futuristic setting of _Blade Runner 2049_, the game features digital scrambling effects and other visual elements that evoke a sense of being set in a distant, technologically advanced future.
 - **Immersive Experience**: The overall design aims to transport players into the world of Blade Runner, blending the thrill of word puzzles with the captivating atmosphere of the movie.
 
-[Blade Runner Poster](https://wordrunner.rev4labs.com/bladerunner.png)
+![Blade Runner Poster](/public/bladerunner.png)
 
 <br>
 
