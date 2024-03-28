@@ -1,57 +1,58 @@
-"use strict"
+"use strict";
 
-import "../style/main.css"
-import { Campaign } from "./campaign.js"
-import { Round } from "./round.js"
-import { UI } from "./ui.js"
-import { WORDS } from "./words.js"
-import { WORDS_SUPPLEMENT } from "./words-supplement.js"
-import JSConfetti from "js-confetti"
+import "../style/main.css";
+import { Campaign } from "./campaign.js";
+import { Round } from "./round.js";
+import { UI } from "./ui.js";
+import { WORDS } from "./words.js";
+import { WORDS_SUPPLEMENT } from "./words-supplement.js";
+import JSConfetti from "js-confetti";
 
-let game, ui, campaign
-const jsConfetti = new JSConfetti()
+let game, ui, campaign;
+const jsConfetti = new JSConfetti();
 
 async function checkRow() {
-  const guess = ui.board[ui.curRow].join("")
-  ui.clickAudio.pause()
+  const guess = ui.board[ui.curRow].join("");
+  ui.clickAudio.pause();
   if (
     !WORDS.includes(guess.toUpperCase()) &&
     !WORDS_SUPPLEMENT.includes(guess.toUpperCase())
   ) {
     ui.invalidAudio.play().catch((error) => {
       /*do nothing - it's just audio*/
-    })
-    ui.displayMessage(`${guess} is not a word`)
-    return
+    });
+    ui.displayMessage(`${guess} is not a word`);
+    BACKSPACE.classList.add("notWord");
+    return;
   }
-  game.submitGuess(guess)
-  await ui.revealGuess(game.guessStatus())
-  ui.updateKeyboard(game.letterStatus)
+  game.submitGuess(guess);
+  await ui.revealGuess(game.guessStatus());
+  ui.updateKeyboard(game.letterStatus);
   if (game.secretWord === guess) {
-    winRoutine()
-    return
+    winRoutine();
+    return;
   }
   if (ui.curRow >= 5) {
-    loseRoutine()
-    return
+    loseRoutine();
+    return;
   }
 
-  ui.curRow++
-  ui.curCol = 0
+  ui.curRow++;
+  ui.curCol = 0;
 }
 
 function winRoutine() {
-  ui.curRow++
+  ui.curRow++;
   let gameDetails = {
     outcome: "won",
     attempts: ui.curRow,
     word: game.secretWord,
     score: game.wordBasePointValue() * 10 ** (6 - ui.curRow),
-  }
-  ui.busy = true
+  };
+  ui.busy = true;
   ui.successAudio.play().catch((error) => {
     /*do nothing - it's just audio*/
-  })
+  });
   jsConfetti.addConfetti({
     confettiColors: [
       "#17aad8",
@@ -61,8 +62,8 @@ function winRoutine() {
       "#ee610a",
       "#ea410b",
     ],
-  })
-  campaign.updateCampaign(gameDetails)
+  });
+  campaign.updateCampaign(gameDetails);
   setTimeout(() => {
     ui.showModal(
       "Success",
@@ -72,13 +73,13 @@ function winRoutine() {
         ...formatDefinition(game.wordDefinition),
       ],
       game.gameState
-    )
-    ui.busy = false
-  }, 1500)
+    );
+    ui.busy = false;
+  }, 1500);
 }
 
 function loseRoutine() {
-  ui.curRow++
+  ui.curRow++;
   let gameDetails = {
     outcome: "lost",
     attempts: ui.curRow,
@@ -87,11 +88,11 @@ function loseRoutine() {
       campaign.averageScore() > 0
         ? -1 * campaign.averageScore()
         : campaign.averageScore(),
-  }
-  campaign.updateCampaign(gameDetails)
+  };
+  campaign.updateCampaign(gameDetails);
   ui.failAudio.play().catch((error) => {
     /*do nothing - it's just audio*/
-  })
+  });
   ui.showModal(
     "Failure",
     [
@@ -100,33 +101,33 @@ function loseRoutine() {
       ...formatDefinition(game.wordDefinition),
     ],
     game.gameState
-  )
+  );
 }
 
 function formatDefinition(packedDefinition) {
   return packedDefinition.map((el) => {
-    let htmlString = ""
-    if (el.partOfSpeech) htmlString = `<i>${el.partOfSpeech}:</i>&nbsp;&nbsp;`
-    return `${htmlString}${el.definition}`
-  })
+    let htmlString = "";
+    if (el.partOfSpeech) htmlString = `<i>${el.partOfSpeech}:</i>&nbsp;&nbsp;`;
+    return `${htmlString}${el.definition}`;
+  });
 }
 
 function tablizeStats(gameDetails) {
-  let statStr = "<hr><table class='statTable'>"
+  let statStr = "<hr><table class='statTable'>";
 
   function statRow(statKey, statValue) {
-    return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`
+    return `<tr><td>${statKey}</td><td class="statNum">${statValue}</td></tr>`;
   }
 
   if (gameDetails) {
-    statStr = `${statStr}${statRow("Word", gameDetails.word)}`
-    statStr = `${statStr}${statRow("Attempts", gameDetails.attempts)}`
-    statStr = `${statStr}${statRow("Round Score", gameDetails.score)}`
+    statStr = `${statStr}${statRow("Word", gameDetails.word)}`;
+    statStr = `${statStr}${statRow("Attempts", gameDetails.attempts)}`;
+    statStr = `${statStr}${statRow("Round Score", gameDetails.score)}`;
   }
   for (let el of campaign.campaignSummary()) {
-    statStr = `${statStr}${statRow(el.label, el.value)}`
+    statStr = `${statStr}${statRow(el.label, el.value)}`;
   }
-  return `${statStr}</table><hr>`
+  return `${statStr}</table><hr>`;
 }
 
 function instructions() {
@@ -148,65 +149,65 @@ function instructions() {
         "by 10 twice, once for each of the two unused attempts: 7 x 10 x 10 = 700.",
     ],
     game.gameState
-  )
+  );
 }
 
 window.addEventListener("keydown", function (event) {
-  if (ui.busy) return
+  if (ui.busy) return;
   if (event.key === "Enter" && modalContainer.style.display !== "none") {
-    closeButton.click()
-    return
+    closeButton.click();
+    return;
   }
 
   document.getElementById(event.key.toUpperCase()) &&
-    document.getElementById(event.key.toUpperCase()).click()
+    document.getElementById(event.key.toUpperCase()).click();
 
-  if (event.key === "Delete") document.getElementById("BACKSPACE").click()
-})
+  if (event.key === "Delete") document.getElementById("BACKSPACE").click();
+});
 
-pageContainer.addEventListener("touchstart", touchAndClickHandler)
+pageContainer.addEventListener("touchstart", touchAndClickHandler);
 
-pageContainer.addEventListener("click", touchAndClickHandler)
+pageContainer.addEventListener("click", touchAndClickHandler);
 
 function touchAndClickHandler(event) {
-  if (!(event.target.nodeName === "SPAN")) return
-  if (ui.busy) return
+  if (!(event.target.nodeName === "SPAN")) return;
+  if (ui.busy) return;
 
   if (event.type === "touchstart") {
-    event.preventDefault()
+    event.preventDefault();
   }
 
-  ui.clickAudio.currentTime = 0
+  ui.clickAudio.currentTime = 0;
   ui.clickAudio.play().catch((error) => {
     /*do nothing - it's just audio*/
-  })
+  });
 
-  let key = event.target.id
+  let key = event.target.id;
   if (game.gameState === "PLAYING") {
-    if (key === "BACKSPACE") ui.deleteLetter()
-    if (key === "ENTER" && ui.curCol > 4) checkRow()
+    if (key === "BACKSPACE") ui.deleteLetter();
+    if (key === "ENTER" && ui.curCol > 4) checkRow();
     if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(key))
-      ui.appendLetter(key)
-    return
+      ui.appendLetter(key);
+    return;
   }
 
-  if (game.gameState !== "PLAYING" && key === "ENTER") newRound()
+  if (game.gameState !== "PLAYING" && key === "ENTER") newRound();
 }
 
 function newRound() {
-  game = new Round(WORDS[Math.floor(Math.random() * WORDS.length)])
-  console.log(game.secretWord)
-  ui.reset()
+  game = new Round(WORDS[Math.floor(Math.random() * WORDS.length)]);
+  console.log(game.secretWord);
+  ui.reset();
 }
 
 function main() {
   // localStorage.clear()
-  campaign = new Campaign()
-  ui = new UI(pageContainer)
-  newRound()
-  instructions()
+  campaign = new Campaign();
+  ui = new UI(pageContainer);
+  newRound();
+  instructions();
 }
 
 window.onload = function () {
-  main()
-}
+  main();
+};
