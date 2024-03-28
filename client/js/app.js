@@ -184,10 +184,21 @@ function touchAndClickHandler(event) {
 
   let key = event.target.id;
   if (game.gameState === "PLAYING") {
-    if (key === "BACKSPACE") ui.deleteLetter();
-    if (key === "ENTER" && ui.curCol > 4) checkRow();
-    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(key))
+    if (key === "BACKSPACE") {
+      ENTER.classList.remove("pressEnter");
+      ui.deleteLetter();
+    }
+    if (key === "ENTER" && ui.curCol > 4) {
+      ENTER.classList.remove("pressEnter");
+      checkRow();
+    }
+    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").includes(key)) {
+      ENTER.classList.remove("pressEnter");
+      if (ui.curCol > 3) {
+        ENTER.classList.add("pressEnter");
+      }
       ui.appendLetter(key);
+    }
     return;
   }
 

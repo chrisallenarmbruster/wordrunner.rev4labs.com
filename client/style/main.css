@@ -216,13 +216,19 @@ div {
 }
 
 .gameOver {
-  background-color: var(--brBlue1);
-  color: var(--default);
-  border: 0.25cqw solid var(--brBlue1);
+  animation-name: flashBlue;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+.pressEnter {
+  animation-name: flashBlue;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
 }
 
 .notWord {
-  animation-name: flashBackspace;
+  animation-name: flashOrange;
   animation-duration: 1s;
   animation-iteration-count: infinite;
 }
@@ -243,17 +249,42 @@ div {
   }
 }
 
-@keyframes flashBackspace {
-  0%,
+@keyframes flashOrange {
+  0% {
+    background-color: var(--brOrange2);
+    color: var(--text);
+    border: 0.25cqw solid var(--brOrange2);
+  }
+
+  50% {
+    background-color: var(--default);
+    color: var(--text);
+    border: 0.25cqw solid var(--text);
+  }
+
   100% {
     background-color: var(--brOrange2);
     color: var(--text);
-    border: 0.25cqw solid var(--text);
+    border: 0.25cqw solid var(--brOrange2);
+  }
+}
+
+@keyframes flashBlue {
+  0% {
+    background-color: var(--brBlue1);
+    color: var(--text);
+    border: 0.25cqw solid var(--brBlue1);
   }
   50% {
     background-color: var(--default);
     color: var(--text);
     border: 0.25cqw solid var(--text);
+  }
+
+  100% {
+    background-color: var(--brBlue1);
+    color: var(--text);
+    border: 0.25cqw solid var(--brBlue1);
   }
 }
 
